@@ -15,7 +15,7 @@ run_analysis <- function(seur_obj){
 }
 
 folder <- "~/desktop/conradLab/thesis/scSHARP/simulations/"
-for(i in seq(.1,.2,length.out=2)){
+for(i in seq(.1,.2,length.out=3)){
   full_path <- paste(folder,"splat_",i,"_de_rq/", sep="")
   dir.create(full_path)
   
@@ -44,9 +44,9 @@ for(i in seq(.1,.2,length.out=2)){
   ggsave(paste(full_path,"ref_umap_groups.pdf",sep=""), plot=umap, device="pdf")
   
   #query umaps
-  umap <- DimPlot(whole, reduction="umap")
+  umap <- DimPlot(query, reduction="umap")
   ggsave(paste(full_path,"query_umap.pdf",sep=""), plot=umap, device="pdf")
-  umap <- DimPlot(whole, reduction="umap", group.by = "Group")
+  umap <- DimPlot(query, reduction="umap", group.by = "Group")
   ggsave(paste(full_path,"query_umap_groups.pdf",sep=""), plot=umap, device="pdf")
   
   Idents(object = whole) <- "Group"

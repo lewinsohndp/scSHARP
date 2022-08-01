@@ -10,6 +10,9 @@ import math
 import rpy2.robjects as ro
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.conversion import localconverter
+import json
+import pandas as pd
+from sklearn.preprocessing import OneHotEncoder
 
 """General functions and definitions"""
 
@@ -93,3 +96,85 @@ def label_counts(data_path, tools, ref_path, ref_label_path, marker_path):
         preds = ro.conversion.rpy2py(preds)
     
     return preds
+
+def load_model(file_path):
+        """loads model from json format"""
+        
+        f = open(file_path)
+        data = json.load(f)
+        f.close()
+        final_layers = []
+
+        for layer in data['layers']:
+            if layer['type'] == 'EdgeConv':
+                new_layer = EdgeConv(layer['input'],layer['output'])
+            
+            elif layer['type'] == 'Linear':
+                new_layer = torch.nn.Linear(layer['input'], layer['output'])
+            
+            else:
+                raise Exception("Unrecognizable layer type")
+            
+            final_layers.append(new_layer)
+        
+        return final_layers
+
+def factorize_df(df, all_cells):
+    """factorizes all columns in pandas df"""
+
+    # add array with all cell options so factor is the same for each column
+    dummy = []
+    for i in range(len(all_cells)):
+        dummy.append([all_cells[i]]*df.shape[1])
+    dummy = pd.DataFrame(dummy)
+    dummy.columns = df.columns
+    df = pd.concat([df,dummy])
+    
+    temp = df.apply(pd.factorize, axis=0, sort=True)
+    temp = temp.iloc[0,:]
+    indices = list(temp.index)
+    d = {key: None for key in indices}
+    for i in range(temp.shape[0]):
+        d[indices[i]] = temp.iloc[i]
+
+    return pd.DataFrame(d).iloc[:-len(all_cells)]
+
+def encode_predictions(df):
+    """encodes predictions for each cell with 1 for each prediction"""
+    all_preds = []
+    for i in range(df.shape[1]):
+        all_preds.append(df.iloc[:,i].to_numpy())
+    all_preds = np.array(all_preds).flatten()
+    
+    #add -1 then remove so encoder takes into account unknowns even if there isn't any
+    all_preds = np.append(all_preds, -1)
+    enc = OneHotEncoder(drop='first')
+    encoded_y = enc.fit_transform(all_preds.reshape(-1,1)).toarray()
+    encoded_y = encoded_y[:-1,:]
+    # need to add three scores together
+    final_encoded = np.zeros(shape=(df.shape[0],encoded_y.shape[1]))
+    scoring_length = df.shape[0]
+    lower =0
+    upper = scoring_length
+    for i in range(int(len(encoded_y)/df.shape[0])):
+        final_encoded += encoded_y[lower:upper,:]
+        lower = upper
+        upper += scoring_length
+    
+    return final_encoded
+
+def pred_accuracy(preds, real):
+    """returns accuracy of predictions"""
+    return float((torch.tensor(preds) == torch.tensor(real)).type(torch.FloatTensor).mean().numpy())
+
+def get_consensus_labels(encoded_y, necessary_vote):
+    """method that gets consensus vote of multiple prediction tools"""
+    confident_labels = np.zeros(shape = (encoded_y.shape[0],))
+    for i in range(encoded_y.shape[0]):
+        row = encoded_y[i,:]
+        max_index = np.argmax(row)
+        if row[max_index] > (necessary_vote-1):
+            confident_labels[i] = max_index
+        else: confident_labels[i] = -1
+    
+    return confident_labels

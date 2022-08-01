@@ -7,6 +7,8 @@ require(dplyr)
 require(SingleR)
 
 run_scina <- function(data, markers=NULL, ref=NULL){
+  # can return "unknown"
+  
   if(is.null(markers)){
     return(F)
   }
@@ -14,12 +16,15 @@ run_scina <- function(data, markers=NULL, ref=NULL){
   results <- SCINA(as.matrix(data@assays$RNA@data), markers)
   scina_preds <- results$cell_labels
   
+  scina_preds = replace(scina_preds, scina_preds=="unknown", NA)
   return(scina_preds)
   
 }
 
 run_scsorter <- function(data, markers=NULL, ref=NULL){
   #need top variable genes
+  #can return "Unknown"
+  
   if(is.null(markers)){
     return(F)
   }
@@ -40,6 +45,7 @@ run_scsorter <- function(data, markers=NULL, ref=NULL){
   
   rts <- scSorter(expr, anno)
   scsort_preds = rts$Pred_Type
+  scsort_preds = replace(scsort_preds, scsort_preds=="Unknown", NA)
   
   return(scsort_preds)
 }
@@ -58,7 +64,7 @@ run_sctype <- function(data, markers=NULL, ref=NULL){
     head(data.frame(cluster = cl, type = names(es.max.cl), scores = es.max.cl, ncells = sum(data@meta.data$seurat_clusters==cl)), 10)
   }))
   sctype_scores = cL_resutls %>% group_by(cluster) %>% top_n(n = 1, wt = scores)
-  sctype_scores$type[as.numeric(as.character(sctype_scores$scores)) < sctype_scores$ncells/4] = "NA"
+  sctype_scores$type[as.numeric(as.character(sctype_scores$scores)) < sctype_scores$ncells/4] = NA
   
   for(j in unique(sctype_scores$cluster)){
     cl_type = sctype_scores[sctype_scores$cluster==j,]; 
@@ -117,6 +123,7 @@ run <- function(data_path, tools, markers=NULL, marker_names=NULL, ref_path=NULL
   }
   
   results_df = results_df[-1]
+  row.names(results_df) <- row.names(data@meta.data)
   return(results_df)
 }
 
