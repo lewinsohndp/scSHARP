@@ -5,6 +5,7 @@ require(SCINA)
 require(scSorter)
 require(dplyr)
 require(SingleR)
+require("scPred")
 
 run_scina <- function(data, markers=NULL, ref=NULL){
   # can return "unknown"
@@ -81,6 +82,23 @@ run_singler <- function(data, ref, ref_labels){
   return(results$pruned.labels)
 }
 
+run_scpred <- function(data, ref, ref_labels){
+  # can return "unassigned"
+  ref <- FindVariableFeatures(ref)
+  ref <- ScaleData(ref)
+  ref <- RunPCA(ref)
+  ref <- RunUMAP(ref, dims=1:30)
+  ref <- AddMetaData(ref, ref_labels, col.name="celltype")
+  ref <- getFeatureSpace(ref, "celltype")
+  ref <- trainModel(ref)
+  data <- scPredict(data, ref)
+  
+  scpreds = data$scpred_prediction
+  scpreds = replace(scpreds, scpreds=="unassigned", NA)
+  
+  return(scpreds)
+}
+
 run <- function(data_path, tools, markers=NULL, marker_names=NULL, ref_path=NULL, ref_labels_path=NULL){
   # add ability to take in seurat counts object
   
@@ -114,12 +132,19 @@ run <- function(data_path, tools, markers=NULL, marker_names=NULL, ref_path=NULL
     results_df$sctype <- run_sctype(data, markers)
   }
   
-  if(!is.null(ref_path) & ("singler" %in% tools)){
+  if(!is.null(ref_path)){
     ref_counts <- read.csv(ref_path, header=T, row.names = 1)
     ref_labels = read.csv(ref_labels_path, header=T, row.names=1)
     ref <- CreateSeuratObject(t(ref_counts))
     ref <- NormalizeData(ref)
-    results_df$singler <- run_singler(data, ref, ref_labels)
+    
+    if("singler" %in% tools){
+      results_df$singler <- run_singler(data, ref, ref_labels)
+    }
+    if("scpred" %in% tools){
+      results_df$scpred <- run_scpred(data, ref, ref_labels)
+    }
+    
   }
   
   results_df = results_df[-1]

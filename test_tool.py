@@ -14,12 +14,12 @@ class TestTools(unittest.TestCase):
 
     def test_rtools(self):
         ro.r.source('tools/r_tools.R')
-        preds = ro.r.run(self.query_path, ["scsorter", "sctype", "scina", "singler"], self.markers, self.marker_names, self.ref_path, self.ref_label_path)
+        preds = ro.r.run(self.query_path, ["scsorter", "sctype", "scina", "singler", "scpred"], self.markers, self.marker_names, self.ref_path, self.ref_label_path)
         with localconverter(ro.default_converter + pandas2ri.converter):
             preds = ro.conversion.rpy2py(preds)
 
-        #print(preds.head)
-        assert preds.shape == (1000,4)
+        print(preds.head)
+        assert preds.shape == (1000,5)
     
     def test_pytools(self):
         pass
