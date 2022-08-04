@@ -20,3 +20,4 @@ for config in gcn_configs:
                 
                 counter +=1
 
+print(counter)
