@@ -17,7 +17,7 @@ run_analysis <- function(seur_obj){
 folder <- "~/desktop/conradLab/thesis/scSHARP/simulations/"
 param_data_path <- "~/desktop/conradLab/thesis/scsharp/filtered_gene_bc_matrices/GRCh38/matrix.mtx"
 
-counts <- Matrix::readMM()
+counts <- Matrix::readMM(param_data_path)
 set.seed(8)
 counts <- counts[,sample(1:ncol(counts), 1000)]
 # filtering for acutally expressed genes
@@ -71,6 +71,14 @@ for(i in seq(.5,.7,length.out=3)){
   write.csv(group3.markers, paste(full_path,"group3_de.csv",sep=""))
   write.csv(group4.markers, paste(full_path,"group4_de.csv",sep=""))
   
+  # write markers.txt
+  group1 <- paste("Group1:",paste(row.names(group1.markers)[1:5], collapse=", "))
+  group2 <- paste("Group2:",paste(row.names(group2.markers)[1:5], collapse=", "))
+  group3 <- paste("Group3:",paste(row.names(group3.markers)[1:5], collapse=", "))
+  group4 <- paste("Group4:",paste(row.names(group4.markers)[1:5], collapse=", "))
+  all <- c(group1, group2, group3, group4)
+  write(all, paste(full_path, "markers.txt", sep=""), ncolumns = 1, sep = "\n")
+  
   write.csv(t(whole@assays$RNA@counts), paste(full_path,"whole_counts.csv",sep=""))
   write.csv(whole@meta.data, paste(full_path,"whole_meta.csv",sep=""))
   
@@ -81,5 +89,3 @@ for(i in seq(.5,.7,length.out=3)){
   write.csv(t(query@assays$RNA@counts), paste(full_path,"query_counts.csv",sep=""))
   write.csv(query@meta.data, paste(full_path,"query_meta.csv",sep=""))
 }
-
-print(params)
