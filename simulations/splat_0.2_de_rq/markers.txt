@@ -1,4 +1,0 @@
-Group1: Gene14207, Gene19034, Gene2396, Gene948, Gene9141
-Group2: Gene9155, Gene5388, Gene4361, Gene10982, Gene16515
-Group3: Gene13075, Gene142, Gene3523, Gene14279, Gene14643
-Group4: Gene16021, Gene9929, Gene11519, Gene6797, Gene13413

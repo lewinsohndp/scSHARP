@@ -1,6 +1,6 @@
 import torch
 from torch_geometric.nn import MessagePassing
-from torch.nn import Sequential as Seq, Linear, SiLU
+from torch.nn import Sequential as Seq, Linear, SiLU, Dropout
 import anndata as ad
 import scanpy as sc
 from sklearn.decomposition import PCA

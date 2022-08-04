@@ -6,7 +6,7 @@ from sklearn.metrics import confusion_matrix
 class GCNModel:
     """class for label propagation GCN model"""
 
-    def __init__(self, config_file, neighbors, dropout=0):
+    def __init__(self, config_file, neighbors, dropout=0.0):
         self.config = config_file
         self.neighbors = neighbors
         self.dropout = dropout
@@ -18,6 +18,8 @@ class GCNModel:
     def forward(self, X, edge_index=None):
         """forward pass through model"""
 
+        dropout = torch.nn.Dropout(p=self.dropout)
+        X = dropout(X)
         for layer in self.layers:
             #if on linear layer, no need to construct graph
             if type(layer) == torch.nn.modules.linear.Linear:

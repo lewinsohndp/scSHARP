@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# simulation param dataset
+#simulations/
+filtered_gene_bc_matrices/ 

@@ -53,7 +53,7 @@ def test_model(data_folders, tool_list, votes, model_file, neighbors, nbatch, tr
             train_accuracies[i] = metrics[2]
             test_accuracies[i] = metrics[4]
 
-        
+        print(total_accuracies)
         # max of columns pred.
         max_pred = torch.tensor(encoded_labels).max(dim=1)[1]
 

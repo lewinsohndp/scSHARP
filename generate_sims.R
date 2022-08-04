@@ -1,6 +1,6 @@
 library(splatter)
 library(Seurat)
-library(scater)
+#library(scater)
 library(ggplot2)
 
 run_analysis <- function(seur_obj){
@@ -15,11 +15,23 @@ run_analysis <- function(seur_obj){
 }
 
 folder <- "~/desktop/conradLab/thesis/scSHARP/simulations/"
-for(i in seq(.1,.2,length.out=3)){
+param_data_path <- "~/desktop/conradLab/thesis/scsharp/filtered_gene_bc_matrices/GRCh38/matrix.mtx"
+
+counts <- Matrix::readMM()
+set.seed(8)
+counts <- counts[,sample(1:ncol(counts), 1000)]
+# filtering for acutally expressed genes
+# counts = counts[rowSums(counts)>1, ]
+
+params <- splatEstimate(as.matrix(counts))
+
+for(i in seq(.4,.7,length.out=4)){
   full_path <- paste(folder,"splat_",i,"_de_rq/", sep="")
   dir.create(full_path)
   
-  sim.groups <- splatSimulate(batchCells=c(1000, 1000), group.prob = c(.423, .227, .226, .124), method = "groups", nGenes = 20000, de.facScale=i, verbose = FALSE, seed=8)
+  params <- setParams(params, dropout.type='experiment', batchCells=c(1000, 1000), group.prob = c(.25, .25, .25, .25), de.facScale=i, seed=8)
+  print(params)
+  sim.groups <- splatSimulate(params, method = "groups", verbose = T)
   
   whole <- CreateSeuratObject(assays(sim.groups)$counts, meta.data=as.data.frame(sim.groups@colData))
   ref <- subset(x = whole, subset = Batch == "Batch1")
@@ -69,3 +81,5 @@ for(i in seq(.1,.2,length.out=3)){
   write.csv(t(query@assays$RNA@counts), paste(full_path,"query_counts.csv",sep=""))
   write.csv(query@meta.data, paste(full_path,"query_meta.csv",sep=""))
 }
+
+print(params)
