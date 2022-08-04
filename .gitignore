@@ -129,5 +129,5 @@ dmypy.json
 .pyre/
 
 # simulation param dataset
-#simulations/
-filtered_gene_bc_matrices/ 
+simulations/
+#filtered_gene_bc_matrices/ 

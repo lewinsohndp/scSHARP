@@ -25,7 +25,7 @@ counts <- counts[,sample(1:ncol(counts), 1000)]
 
 params <- splatEstimate(as.matrix(counts))
 
-for(i in seq(.4,.7,length.out=4)){
+for(i in seq(.5,.7,length.out=3)){
   full_path <- paste(folder,"splat_",i,"_de_rq/", sep="")
   dir.create(full_path)
   
