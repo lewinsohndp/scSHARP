@@ -131,4 +131,5 @@ dmypy.json
 # simulation param dataset
 simulations/
 grid_search_files/
+grid_search_output/
 #filtered_gene_bc_matrices/ 

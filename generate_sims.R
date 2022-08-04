@@ -14,8 +14,8 @@ run_analysis <- function(seur_obj){
   return(seur_obj)
 }
 
-folder <- "~/desktop/conradLab/thesis/scSHARP/simulations/"
-param_data_path <- "~/desktop/conradLab/thesis/scsharp/filtered_gene_bc_matrices/GRCh38/matrix.mtx"
+folder <- "/home/groups/ConradLab/daniel/sharp_sims/"
+param_data_path <- "~/scSHARP/filtered_gene_bc_matrices/GRCh38/matrix.mtx"
 
 counts <- Matrix::readMM(param_data_path)
 set.seed(8)

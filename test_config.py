@@ -23,7 +23,7 @@ batch_size = int(config['batch_size'])
 neighbors = int(config['neighbors'])
 tools = ["sctype","scsorter","scina","singler", "scpred"]
 votes = 3
-training_epochs = 1
+training_epochs = 200
 data_path = data_folder + "query_counts.csv"
 ref_path = data_folder + "ref_counts.csv"
 ref_label_path = data_folder + "ref_labels.csv"
@@ -53,7 +53,7 @@ dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle
 test_dataset  = torch.utils.data.TensorDataset(torch.tensor(X), torch.tensor(real_y))
 test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-random_inits = 1
+random_inits = 5
 train_accuracies = [0]*random_inits
 test_accuracies = [0]*random_inits
 total_accuracies = [0]*random_inits
