@@ -14,14 +14,14 @@ run_analysis <- function(seur_obj){
   return(seur_obj)
 }
 
-#folder <- "/home/groups/ConradLab/daniel/sharp_sims/"
-#param_data_path <- "~/scSHARP/filtered_gene_bc_matrices/GRCh38/matrix.mtx"
-folder <- "~/desktop/conradlab/thesis/scsharp/simulations/"
-param_data_path <- "~/desktop/conradlab/thesis/scSHARP/filtered_gene_bc_matrices/GRCh38/matrix.mtx"
+folder <- "/home/groups/ConradLab/daniel/sharp_sims/"
+param_data_path <- "~/scSHARP/filtered_gene_bc_matrices/GRCh38/matrix.mtx"
+#folder <- "~/desktop/conradlab/thesis/scsharp/simulations/"
+#param_data_path <- "~/desktop/conradlab/thesis/scSHARP/filtered_gene_bc_matrices/GRCh38/matrix.mtx"
 
 counts <- Matrix::readMM(param_data_path)
 set.seed(8)
-counts <- counts[,sample(1:ncol(counts), 1000)]
+# counts <- counts[,sample(1:ncol(counts), 1000)]
 # filtering for acutally expressed genes
 # counts = counts[rowSums(counts)>1, ]
 
