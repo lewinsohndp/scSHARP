@@ -11,10 +11,10 @@ class TestUtilities(unittest.TestCase):
         self.pred_df = pd.DataFrame({"tool1":["type2","type2", "type1"], "tool2":["type1", "type2", "type3"], "tool3":[pd.NA, "type3", "type3"]})
 
     def test_marker_parser(self):
-        correct_markers = [["Gene14207", "Gene19034", "Gene2396", "Gene948", "Gene9141"],["Gene9155", "Gene5388", "Gene4361", "Gene10982", "Gene16515"], ["Gene13075", "Gene142", "Gene3523", "Gene14279", "Gene14643"], ["Gene16021", "Gene9929", "Gene11519", "Gene6797", "Gene13413"]]
+        correct_markers = [["Gene13796", "Gene19442", "Gene28124", "Gene22910", "Gene31354"],["Gene19098", "Gene17789", "Gene4696", "Gene25466", "Gene24205"], ["Gene1957", "Gene6552", "Gene931", "Gene25528", "Gene2460"], ["Gene1682", "Gene20645", "Gene17237", "Gene11077", "Gene32186"]]
         correct_marker_names = ["Group1", "Group2", "Group3", "Group4"]
 
-        markers, marker_names = utilities.read_marker_file("simulations/splat_0.2_de_rq/markers.txt")
+        markers, marker_names = utilities.read_marker_file("simulations/splat_0.5_de_rq/markers_test.txt")
 
         assert markers == correct_markers
         assert marker_names == correct_marker_names

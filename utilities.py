@@ -69,7 +69,10 @@ def mask_labels(labels, masking_pct):
 def read_marker_file(file_path):
     """parse marker file"""
 
-    with open(file_path) as f:
+    marker_df = pd.read_csv(file_path, header=None, index_col=0)
+    markers = np.array(marker_df).tolist()
+    marker_names = list(marker_df.index)
+    """with open(file_path) as f:
         lines = f.readlines()
         f.close()
     
@@ -80,7 +83,7 @@ def read_marker_file(file_path):
         temp_markers = line.split(sep=":")[1].split(sep=",")
         temp_markers = [s.strip() for s in temp_markers]
         markers[i] = temp_markers
-        marker_names[i] = temp_name
+        marker_names[i] = temp_name"""
 
     return markers, marker_names
 

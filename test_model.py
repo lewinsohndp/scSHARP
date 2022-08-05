@@ -4,6 +4,7 @@ import torch
 from gcn_model import GCNModel
 import utilities
 import statistics
+import os
 
 def test_model(data_folders, tool_list, votes, model_file, neighbors, nbatch, training_epochs, random_inits):
     
@@ -16,7 +17,11 @@ def test_model(data_folders, tool_list, votes, model_file, neighbors, nbatch, tr
         ref_path = data_folder + "ref_counts.csv"
         ref_label_path = data_folder + "ref_labels.csv"
         marker_path = data_folder + "markers.txt"
-        all_labels = utilities.label_counts(data_path,tools,ref_path,ref_label_path,marker_path)
+        if os.path.exists(data_folder + "preds.csv"):
+            all_labels = pd.read_csv(data_folder + "preds.csv", index_col=0)
+            if all_labels.shape[1] != len(tools): raise Exception("wrong amount of tools in file")
+        else:
+            all_labels = utilities.label_counts(data_path,tools,ref_path,ref_label_path,marker_path)
 
         _,marker_names = utilities.read_marker_file(marker_path)
 

@@ -14,8 +14,10 @@ run_analysis <- function(seur_obj){
   return(seur_obj)
 }
 
-folder <- "/home/groups/ConradLab/daniel/sharp_sims/"
-param_data_path <- "~/scSHARP/filtered_gene_bc_matrices/GRCh38/matrix.mtx"
+#folder <- "/home/groups/ConradLab/daniel/sharp_sims/"
+#param_data_path <- "~/scSHARP/filtered_gene_bc_matrices/GRCh38/matrix.mtx"
+folder <- "~/desktop/conradlab/thesis/scsharp/simulations/"
+param_data_path <- "~/desktop/conradlab/thesis/scSHARP/filtered_gene_bc_matrices/GRCh38/matrix.mtx"
 
 counts <- Matrix::readMM(param_data_path)
 set.seed(8)
@@ -72,10 +74,10 @@ for(i in seq(.5,.7,length.out=3)){
   write.csv(group4.markers, paste(full_path,"group4_de.csv",sep=""))
   
   # write markers.txt
-  group1 <- paste("Group1:",paste(row.names(group1.markers)[1:5], collapse=", "))
-  group2 <- paste("Group2:",paste(row.names(group2.markers)[1:5], collapse=", "))
-  group3 <- paste("Group3:",paste(row.names(group3.markers)[1:5], collapse=", "))
-  group4 <- paste("Group4:",paste(row.names(group4.markers)[1:5], collapse=", "))
+  group1 <- paste("Group1,",paste(row.names(group1.markers)[1:5], collapse=","), sep="")
+  group2 <- paste("Group2,",paste(row.names(group2.markers)[1:5], collapse=","), sep="")
+  group3 <- paste("Group3,",paste(row.names(group3.markers)[1:5], collapse=","), sep="")
+  group4 <- paste("Group4,",paste(row.names(group4.markers)[1:5], collapse=","), sep="")
   all <- c(group1, group2, group3, group4)
   write(all, paste(full_path, "markers.txt", sep=""), ncolumns = 1, sep = "\n")
   

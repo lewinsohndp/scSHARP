@@ -1,12 +1,5 @@
 # script that runs R prediction tools
 
-require(Seurat)
-require(SCINA)
-require(scSorter)
-require(dplyr)
-require(SingleR)
-require("scPred")
-
 run_scina <- function(data, markers=NULL, ref=NULL){
   # can return "unknown"
   
@@ -102,6 +95,13 @@ run_scpred <- function(data, ref, ref_labels){
 run <- function(data_path, tools, markers=NULL, marker_names=NULL, ref_path=NULL, ref_labels_path=NULL){
   # add ability to take in seurat counts object
   
+  require(Seurat)
+  require(SCINA)
+  require(scSorter)
+  require(dplyr)
+  require(SingleR)
+  require("scPred")
+  
   counts <- read.csv(data_path, header=T, row.names = 1)
   data <- CreateSeuratObject(t(counts))
   data <- NormalizeData(data)
@@ -111,6 +111,7 @@ run <- function(data_path, tools, markers=NULL, marker_names=NULL, ref_path=NULL
   data <- FindNeighbors(data)
   data <- FindClusters(data)
   
+  markers <- unname(markers)
   for(i in 1:length(markers)){
     markers[i] <- list(unlist(markers[i]))
   }
@@ -152,6 +153,30 @@ run <- function(data_path, tools, markers=NULL, marker_names=NULL, ref_path=NULL
   return(results_df)
 }
 
-#data_path <- "~/desktop/conradLab/thesis/scSHARP/simulations/splat_0.4_de/counts.csv"
-#results <- run(data_path)
+# args: data path, out path, tools (comma separated), marker_path, ref_path, ref_label_path
+args <- commandArgs(trailingOnly = T)
+if(length(args) > 2){
+  data_path <- args[1]
+  out_path <- args[2]
+  tools <- args[3]
+  marker_path <- args[4]
+  ref_path <- args[5]
+  ref_label_path <- args[6]
+  
+  tools <- unlist(strsplit(tools,","))
+  
+  print(tools)
+  marker_df <- read.csv(marker_path, header=F, row.names = 1)
+  markers <- as.list(as.data.frame(t(marker_df)))
+  marker_names <- row.names(marker_df)
+  print(markers)
+  print(marker_names)
+  results <- run(data_path, tools, markers, marker_names, ref_path, ref_label_path)
+  
+  write.csv(results, paste(out_path,"preds.csv", sep=""))
+  
+}
+
+
+
 
