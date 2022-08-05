@@ -134,4 +134,5 @@ grid_search_files/
 grid_search_output/
 *.err
 *.out
+*_output/
 #filtered_gene_bc_matrices/ 

@@ -71,6 +71,7 @@ max_train = str(max(train_accuracies))
 max_test = str(max(test_accuracies))
 
 with open(output_folder + out_file, "w") as output:
-    output.write(max_total + "," + max_train + "," + max_test + "\n")
+    index = out_file.split(".")[0]
+    output.write(index + "," +max_total + "," + max_train + "," + max_test + "\n")
     output.close()
 
