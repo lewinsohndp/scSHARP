@@ -44,7 +44,8 @@ def preprocess(data, scale=True, targetsum=1e4, run_pca=True, comps=500):
     adata = ad.AnnData(data, dtype=data.dtype)
     row_filter, _ = sc.pp.filter_cells(adata, min_genes=200, inplace=False)
     col_filter,_ = sc.pp.filter_genes(adata, min_cells=3, inplace=False)
-    adata = adata[row_filter,col_filter]
+    subset = adata[row_filter,col_filter]
+    adata = ad.AnnData(subset.X, dtype=subset.X.dtype)
     sc.pp.normalize_total(adata, target_sum=targetsum, layer=None)
     new_data = adata.X
     new_data = sc.pp.log1p(new_data)
