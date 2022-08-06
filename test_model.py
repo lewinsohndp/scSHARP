@@ -22,19 +22,22 @@ def test_model(data_folders, tool_list, votes, model_file, neighbors, nbatch, tr
             if all_labels.shape[1] != len(tools): raise Exception("wrong amount of tools in file")
         else:
             all_labels = utilities.label_counts(data_path,tools,ref_path,ref_label_path,marker_path)
+        
+        # read in dataset
+        X = pd.read_csv(data_path, index_col=0)
+        X, keep_cells = utilities.preprocess(np.array(X), scale=False)
+
+        all_labels = all_labels.loc[keep_cells,:]
 
         _,marker_names = utilities.read_marker_file(marker_path)
 
         all_labels_factored = utilities.factorize_df(all_labels, marker_names)
         encoded_labels = utilities.encode_predictions(all_labels_factored)
 
-        # read in dataset
-        X = pd.read_csv(data_path, index_col=0)
-        X = utilities.preprocess(np.array(X), scale=False)
-
         meta_path = data_folder + "query_meta.csv"
         metadata = pd.read_csv(meta_path, index_col=0)
         real_y = pd.factorize(metadata['Group'], sort=True)[0]
+        real_y = real_y[keep_cells]
 
         confident_labels = utilities.get_consensus_labels(encoded_labels, necessary_vote = votes)
         train_nodes = np.where(confident_labels != -1)[0]

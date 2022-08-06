@@ -42,8 +42,9 @@ def preprocess(data, scale=True, targetsum=1e4, run_pca=True, comps=500):
     """method for preprocessing raw counts matrix"""
 
     adata = ad.AnnData(data, dtype=data.dtype)
-    sc.pp.filter_cells(adata, min_genes=200)
-    sc.pp.filter_genes(adata, min_cells=3)
+    row_filter, _ = sc.pp.filter_cells(adata, min_genes=200, inplace=False)
+    col_filter,_ = sc.pp.filter_genes(adata, min_cells=3, inplace=False)
+    adata = adata[row_filter,col_filter]
     sc.pp.normalize_total(adata, target_sum=targetsum, layer=None)
     new_data = adata.X
     new_data = sc.pp.log1p(new_data)
@@ -54,8 +55,8 @@ def preprocess(data, scale=True, targetsum=1e4, run_pca=True, comps=500):
     if run_pca:
         pca = PCA(n_components=comps, random_state=8)
         new_data = pca.fit_transform(new_data)
-    
-    return new_data
+
+    return new_data, row_filter
 
 def mask_labels(labels, masking_pct):
     """method for masking labels"""
@@ -181,3 +182,13 @@ def get_consensus_labels(encoded_y, necessary_vote):
         else: confident_labels[i] = -1
     
     return confident_labels
+
+def filter_scores(scores, thresh = 0.5):
+    """filters out score columns with NAs > threshold"""
+    keep_cols = []
+    for col in scores.columns:
+        pct_na = (scores[col].isna().sum()) / scores.shape[0]
+
+        if pct_na < thresh: keep_cols.append(col)
+    
+    return scores[keep_cols]

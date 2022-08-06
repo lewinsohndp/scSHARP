@@ -51,7 +51,7 @@ run_sctype <- function(data, markers=NULL, ref=NULL){
   source("https://raw.githubusercontent.com/IanevskiAleksandr/sc-type/master/R/gene_sets_prepare.R")
   source("https://raw.githubusercontent.com/IanevskiAleksandr/sc-type/master/R/sctype_score_.R")
   
-  es.max = sctype_score(scRNAseqData = as.matrix(data@assays$RNA@data), scaled = F, 
+  es.max = sctype_score(scRNAseqData = as.matrix(data@assays$RNA@data), scaled = T, 
                         gs = markers, gs2 = NULL, gene_names_to_uppercase = F) 
   cL_resutls = do.call("rbind", lapply(unique(data@meta.data$seurat_clusters), function(cl){
     es.max.cl = sort(rowSums(es.max[ ,rownames(data@meta.data[data@meta.data$seurat_clusters==cl, ])]), decreasing = !0)
@@ -122,7 +122,7 @@ run <- function(data_path, tools, markers=NULL, marker_names=NULL, ref_path=NULL
   #markers <- list(Group1=c("Gene1","Gene3"), Group2=c("Gene2"))
   #print(markers)
   results_df <- data.frame(start=rep(0,nrow(counts)))
-  
+  #print(row.names(data@assays$RNA@data))
   if("scina" %in% tools){
     results_df$scina <- run_scina(data, markers)
   }

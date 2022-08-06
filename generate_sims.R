@@ -14,10 +14,10 @@ run_analysis <- function(seur_obj){
   return(seur_obj)
 }
 
-folder <- "/home/groups/ConradLab/daniel/sharp_sims/"
-param_data_path <- "~/scSHARP/filtered_gene_bc_matrices/GRCh38/matrix.mtx"
-#folder <- "~/desktop/conradlab/thesis/scsharp/simulations/"
-#param_data_path <- "~/desktop/conradlab/thesis/scSHARP/filtered_gene_bc_matrices/GRCh38/matrix.mtx"
+# folder <- "/home/groups/ConradLab/daniel/sharp_sims/"
+# param_data_path <- "~/scSHARP/filtered_gene_bc_matrices/GRCh38/matrix.mtx"
+folder <- "~/desktop/conradlab/thesis/scsharp/simulations/"
+param_data_path <- "~/desktop/conradlab/thesis/scSHARP/filtered_gene_bc_matrices/GRCh38/matrix.mtx"
 
 counts <- Matrix::readMM(param_data_path)
 set.seed(8)
@@ -27,11 +27,11 @@ set.seed(8)
 
 params <- splatEstimate(as.matrix(counts))
 
-for(i in seq(.5,.7,length.out=3)){
+for(i in seq(.6,.8,length.out=3)){
   full_path <- paste(folder,"splat_",i,"_de_rq/", sep="")
   dir.create(full_path)
   
-  params <- setParams(params, dropout.type='experiment', batchCells=c(1000, 1000), group.prob = c(.25, .25, .25, .25), de.facScale=i, seed=8)
+  params <- setParams(params, dropout.type='experiment', batchCells=c(1000, 1000), batch.facScale=0.5, group.prob = c(.25, .25, .25, .25), de.facScale=i, seed=9)
   print(params)
   sim.groups <- splatSimulate(params, method = "groups", verbose = T)
   
@@ -74,10 +74,11 @@ for(i in seq(.5,.7,length.out=3)){
   write.csv(group4.markers, paste(full_path,"group4_de.csv",sep=""))
   
   # write markers.txt
-  group1 <- paste("Group1,",paste(row.names(group1.markers)[1:5], collapse=","), sep="")
-  group2 <- paste("Group2,",paste(row.names(group2.markers)[1:5], collapse=","), sep="")
-  group3 <- paste("Group3,",paste(row.names(group3.markers)[1:5], collapse=","), sep="")
-  group4 <- paste("Group4,",paste(row.names(group4.markers)[1:5], collapse=","), sep="")
+  set.seed(8)
+  group1 <- paste("Group1,",paste(row.names(group1.markers)[sample(1:10, 5)], collapse=","), sep="")
+  group2 <- paste("Group2,",paste(row.names(group2.markers)[sample(1:10, 5)], collapse=","), sep="")
+  group3 <- paste("Group3,",paste(row.names(group3.markers)[sample(1:10, 5)], collapse=","), sep="")
+  group4 <- paste("Group4,",paste(row.names(group4.markers)[sample(1:10, 5)], collapse=","), sep="")
   all <- c(group1, group2, group3, group4)
   write(all, paste(full_path, "markers.txt", sep=""), ncolumns = 1, sep = "\n")
   
