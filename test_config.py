@@ -80,6 +80,6 @@ max_test = str(max(test_accuracies))
 
 with open(output_folder + out_file, "w") as output:
     index = out_file.split(".")[0]
-    output.write(index + "," +max_total + "," + max_train + "," + max_test + "," + config['config'] + "," + config['dropout'] + "," + config['batch_size'] +  "," + config["neighbors"] + "\n")
+    output.write(index + "," + max_total + "," + max_train + "," + max_test + "," + config['config'] + "," + str(config['dropout']) + "," + str(config['batch_size']) +  "," + str(config["neighbors"]) + "\n")
     output.close()
 
