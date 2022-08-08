@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --mem=8g
-#SBATCH --array=1-1000%100
+#SBATCH --array=1-80%100
 #SBATCH --partition=gpu
 #SBATCH --time=30
 #SBATCH --output=log-%j.out

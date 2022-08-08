@@ -6,7 +6,7 @@ gcn_configs = os.listdir("configs")
 batch_sizes = [20, 35, 50, 65, 80, 95]
 neighbors = [2, 5, 10, 15, 25, 35, 50]
 #dropouts = [0.0, 0.2, 0.4, 0.6, 0.8]
-dropouts = [0.0]
+dropouts = [0.0, 0.2]
 
 counter = 1
 for config in gcn_configs:
