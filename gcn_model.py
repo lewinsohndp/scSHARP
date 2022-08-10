@@ -22,12 +22,12 @@ class GCNModel:
         X = dropout(X)
         for layer in self.layers:
             #if on linear layer, no need to construct graph
-            if type(layer) == torch.nn.modules.linear.Linear:
-                X = layer(X)
-            else:
+            if type(layer) == utilities.EdgeConv:
                 if edge_index==None:
                     edge_index = self.construct_graph(X)
-                X = layer(X, edge_index)
+                X = layer(X, edge_index)                
+            else:
+                X = layer(X)
 
         return X
     

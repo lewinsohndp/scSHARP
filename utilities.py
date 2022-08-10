@@ -38,7 +38,7 @@ class EdgeConv(MessagePassing):
         tmp = torch.cat([x_i, x_j - x_i], dim=1)  # tmp has shape [E, 2 * in_channels]
         return self.mlp(tmp)
 
-def preprocess(data, scale=True, targetsum=1e4, run_pca=True, comps=500):
+def preprocess(data, normalize=True, scale=True, targetsum=1e4, run_pca=True, comps=500):
     """method for preprocessing raw counts matrix"""
 
     adata = ad.AnnData(data, dtype=data.dtype)
@@ -46,9 +46,11 @@ def preprocess(data, scale=True, targetsum=1e4, run_pca=True, comps=500):
     col_filter,_ = sc.pp.filter_genes(adata, min_cells=3, inplace=False)
     subset = adata[row_filter,col_filter]
     adata = ad.AnnData(subset.X, dtype=subset.X.dtype)
-    sc.pp.normalize_total(adata, target_sum=targetsum, layer=None)
+    if normalize:
+        sc.pp.normalize_total(adata, target_sum=targetsum, layer=None)
     new_data = adata.X
-    new_data = sc.pp.log1p(new_data)
+    if normalize:
+        new_data = sc.pp.log1p(new_data)
     
     if scale:
         new_data = sc.pp.scale(new_data)
@@ -117,8 +119,11 @@ def load_model(file_path):
             elif layer['type'] == 'Linear':
                 new_layer = torch.nn.Linear(layer['input'], layer['output'])
             
+            elif layer['type'] == 'Sigmoid':
+                new_layer = torch.nn.Sigmoid()
+
             else:
-                raise Exception("Unrecognizable layer type")
+                raise Exception("Unrecognizable layer type:" + layer['type'])
             
             final_layers.append(new_layer)
         

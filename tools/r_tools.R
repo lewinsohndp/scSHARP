@@ -6,7 +6,7 @@ run_scina <- function(data, markers=NULL, ref=NULL){
   if(is.null(markers)){
     return(F)
   }
-  
+  print("Running SCINA")  
   results <- SCINA(as.matrix(data@assays$RNA@data), markers)
   scina_preds <- results$cell_labels
   
@@ -23,6 +23,7 @@ run_scsorter <- function(data, markers=NULL, ref=NULL){
     return(F)
   }
   
+  print("Running scSorter") 
   types <- list()
   for(i in 1:length(names(markers))){
     types <- append(types, rep(names(markers)[i], length(unlist(markers[i]))))
@@ -48,9 +49,9 @@ run_sctype <- function(data, markers=NULL, ref=NULL){
   if(is.null(markers)){
     return(F)
   }
+  print("Running scType")
   source("https://raw.githubusercontent.com/IanevskiAleksandr/sc-type/master/R/gene_sets_prepare.R")
   source("https://raw.githubusercontent.com/IanevskiAleksandr/sc-type/master/R/sctype_score_.R")
-  
   es.max = sctype_score(scRNAseqData = as.matrix(data@assays$RNA@data), scaled = F, 
                         gs = markers, gs2 = NULL, gene_names_to_uppercase = F) 
   cL_resutls = do.call("rbind", lapply(unique(data@meta.data$seurat_clusters), function(cl){
@@ -133,7 +134,7 @@ run <- function(data_path, tools, markers=NULL, marker_names=NULL, ref_path=NULL
     results_df$sctype <- run_sctype(data, markers)
   }
   
-  if(!is.null(ref_path)){
+  if((!is.null(ref_path)) & (!is.na(ref_path))){
     ref_counts <- read.csv(ref_path, header=T, row.names = 1)
     ref_labels = read.csv(ref_labels_path, header=T, row.names=1)
     ref <- CreateSeuratObject(t(ref_counts))
@@ -168,9 +169,11 @@ if(length(args) > 2){
   print(tools)
   marker_df <- read.csv(marker_path, header=F, row.names = 1)
   markers <- as.list(as.data.frame(t(marker_df)))
+  markers <- lapply(markers, function(z){ z[!is.na(z) & z != ""]})
   marker_names <- row.names(marker_df)
   print(markers)
   print(marker_names)
+  print(ref_path)
   results <- run(data_path, tools, markers, marker_names, ref_path, ref_label_path)
   
   write.csv(results, paste(out_path,"preds.csv", sep=""))

@@ -6,6 +6,7 @@ import torch
 import utilities
 from gcn_model import GCNModel
 import os
+import statistics
 
 """script that takes in config file and returns metrics"""
 
@@ -24,7 +25,7 @@ batch_size = int(config['batch_size'])
 neighbors = int(config['neighbors'])
 tools = ["sctype","scsorter","scina","singler", "scpred"]
 votes = 3
-training_epochs = 200
+training_epochs = 150
 data_path = data_folder + "query_counts.csv"
 ref_path = data_folder + "ref_counts.csv"
 ref_label_path = data_folder + "ref_labels.csv"
@@ -61,7 +62,7 @@ dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle
 test_dataset  = torch.utils.data.TensorDataset(torch.tensor(X), torch.tensor(real_y))
 test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-random_inits = 5
+random_inits = 10
 train_accuracies = [0]*random_inits
 test_accuracies = [0]*random_inits
 total_accuracies = [0]*random_inits
@@ -74,12 +75,16 @@ for i in range(random_inits):
     train_accuracies[i] = metrics[2]
     test_accuracies[i] = metrics[4]
 
-max_total = str(max(total_accuracies))
-max_train = str(max(train_accuracies))
-max_test = str(max(test_accuracies))
+avg_total = str(statistics.mean(total_accuracies))
+avg_train = str(statistics.mean(train_accuracies))
+avg_test = str(statistics.mean(test_accuracies))
+
+sd_total = str(statistics.stdev(total_accuracies))
+sd_train = str(statistics.stdev(train_accuracies))
+sd_test = str(statistics.stdev(test_accuracies))
 
 with open(output_folder + out_file, "w") as output:
     index = out_file.split(".")[0]
-    output.write(index + "," + max_total + "," + max_train + "," + max_test + "," + config['config'] + "," + str(config['dropout']) + "," + str(config['batch_size']) +  "," + str(config["neighbors"]) + "\n")
+    output.write(index + "," + avg_total + "," + avg_train + "," + avg_test + "," + sd_total + "," + sd_train + "," + sd_test + "," + config['config'] + "," + str(config['dropout']) + "," + str(config['batch_size']) +  "," + str(config["neighbors"]) + "\n")
     output.close()
 
