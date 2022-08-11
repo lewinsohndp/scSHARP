@@ -11,10 +11,10 @@ class TestUtilities(unittest.TestCase):
         self.pred_df = pd.DataFrame({"tool1":["type2","type2", "type1"], "tool2":["type1", "type2", "type3"], "tool3":[pd.NA, "type3", "type3"]})
 
     def test_marker_parser(self):
-        correct_markers = [["Gene13796", "Gene19442", "Gene28124", "Gene22910", "Gene31354"],["Gene19098", "Gene17789", "Gene4696", "Gene25466", "Gene24205"], ["Gene1957", "Gene6552", "Gene931", "Gene25528", "Gene2460"], ["Gene1682", "Gene20645", "Gene17237", "Gene11077", "Gene32186"]]
+        correct_markers = [["Gene32664","Gene10522",'Gene15390',"Gene7622","Gene13270"],["Gene15787","Gene7622","Gene14624","Gene3116","Gene21573"],["Gene7733","Gene29807","Gene19010","Gene26085","Gene3915"],["Gene7884","Gene30004","Gene22657","Gene12393","Gene22733"]]
         correct_marker_names = ["Group1", "Group2", "Group3", "Group4"]
 
-        markers, marker_names = utilities.read_marker_file("simulations/splat_0.5_de_rq/markers_test.txt")
+        markers, marker_names = utilities.read_marker_file("simulations/splat_0.6_de_rq/markers.txt")
 
         assert markers == correct_markers
         assert marker_names == correct_marker_names
@@ -39,7 +39,7 @@ class TestUtilities(unittest.TestCase):
        
         assert utilities.pred_accuracy(preds, real) == real_accuracy
 
-    def test_consensu(self):
+    def test_consensus(self):
         encoded = np.array([[1,1,0],[0,2,1],[1,0,2]])
         correct_labels = np.array([-1, 1, 2])
         test_labels = utilities.get_consensus_labels(encoded, 2)
