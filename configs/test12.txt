@@ -1,0 +1,23 @@
+{
+		"layers": [
+			{
+					"type" : "BatchNorm",
+					"input" : 500
+			},
+			{
+					"type" : "EdgeConv",
+					"input" : 500,
+					"output" : 1000
+			},
+			{
+					"type" : "EdgeConv",
+					"input" : 1000,
+					"output" : 25
+			},
+			{
+					"type" : "Linear",
+					"input" : 25,
+					"output" : 4
+			}
+		]
+}

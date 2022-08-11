@@ -14,7 +14,7 @@ run_analysis <- function(seur_obj){
   return(seur_obj)
 }
 
-folder <- "/home/groups/ConradLab/daniel/sharp_sims/"
+folder <- "/home/groups/ConradLab/daniel/sharp_data/sharp_sims/"
 param_data_path <- "~/scSHARP/filtered_gene_bc_matrices/GRCh38/matrix.mtx"
 # folder <- "~/desktop/conradlab/thesis/scsharp/simulations/"
 # param_data_path <- "~/desktop/conradlab/thesis/scSHARP/filtered_gene_bc_matrices/GRCh38/matrix.mtx"
@@ -27,11 +27,10 @@ set.seed(8)
 
 params <- splatEstimate(as.matrix(counts))
 
-for(i in seq(.6,.8,length.out=3)){
-  full_path <- paste(folder,"splat_",i,"_de_rq/", sep="")
+for(i in seq(.7,.8,length.out=2)){
+  full_path <- paste(folder,"splat_",i,"_de_rq_v3/", sep="")
   dir.create(full_path)
-  
-  params <- setParams(params, dropout.type='experiment', batchCells=c(1000, 1000), batch.facScale=0.5, group.prob = c(.25, .25, .25, .25), de.facScale=i, seed=9)
+  params <- setParams(params, dropout.type='experiment', batchCells=c(1000, 1000), batch.facScale=0.5, group.prob = c(.4, .3, .2, .1), de.facScale=i, seed=9)
   print(params)
   sim.groups <- splatSimulate(params, method = "groups", verbose = T)
   

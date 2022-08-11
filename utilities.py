@@ -1,6 +1,6 @@
 import torch
 from torch_geometric.nn import MessagePassing
-from torch.nn import Sequential as Seq, Linear, SiLU, Dropout
+from torch.nn import Sequential as Seq, Linear, SiLU, Dropout, ELU, Tanh
 import anndata as ad
 import scanpy as sc
 from sklearn.decomposition import PCA
@@ -121,6 +121,9 @@ def load_model(file_path):
             
             elif layer['type'] == 'Sigmoid':
                 new_layer = torch.nn.Sigmoid()
+            
+            elif layer['type'] == 'BatchNorm':
+                new_layer = torch.nn.BatchNorm1d(layer['input'])
 
             else:
                 raise Exception("Unrecognizable layer type:" + layer['type'])

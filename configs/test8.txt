@@ -1,0 +1,19 @@
+{
+		"layers": [
+			{
+					"type" : "EdgeConv",
+					"input" : 128,
+					"output" : 64
+			},
+			{
+					"type" : "EdgeConv",
+					"input" : 64,
+					"output" : 25
+			},
+			{
+					"type" : "Linear",
+					"input" : 25,
+					"output" : 4
+			}
+		]
+}

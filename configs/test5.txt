@@ -1,0 +1,48 @@
+{
+		"layers": [
+			{
+					"type" : "EdgeConv",
+					"input" : 500,
+					"output" : 1000
+			},
+			{
+					"type" : "EdgeConv",
+					"input" : 1000,
+					"output" : 500
+			},
+			{
+					"type" : "EdgeConv",
+					"input" : 500,
+					"output" : 500
+			},
+			{
+                                        "type" : "Linear",
+                                        "input" : 500,
+                                        "output" : 256
+                        },
+                        {
+                                        "type" : "Sigmoid"
+                        },
+                        {
+                                        "type" : "Linear",
+                                        "input" : 256,
+                                        "output" : 128
+                        },
+                        {
+                                        "type" : "Sigmoid"
+                        },
+                        {
+                                        "type" : "Linear",
+                                        "input" : 128,
+                                        "output" : 128
+                        },
+                        {
+                                        "type" : "Sigmoid"
+                        },
+                        {
+                                        "type" : "Linear",
+                                        "input" : 128,
+                                        "output" : 4
+                        }
+		]
+}
