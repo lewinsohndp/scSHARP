@@ -45,6 +45,13 @@ class TestUtilities(unittest.TestCase):
         test_labels = utilities.get_consensus_labels(encoded, 2)
         
         assert np.array_equal(test_labels, correct_labels) == True
+    
+    def test_consensus_pct(self):
+        encoded = np.array([[1,1,0],[0,2,1],[1,0,2]])
+        correct_labels = np.array([-1, 1, 2])
+        test_labels = utilities.get_consensus_labels(encoded, .51)
+        
+        assert np.array_equal(test_labels, correct_labels) == True
 
 if __name__ == '__main__':
     unittest.main() 

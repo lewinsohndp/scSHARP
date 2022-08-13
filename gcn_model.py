@@ -3,10 +3,11 @@ import torch
 from torch_cluster import knn_graph
 from sklearn.metrics import confusion_matrix
 
-class GCNModel:
+class GCNModel(torch.nn.Module):
     """class for label propagation GCN model"""
 
     def __init__(self, config_file, neighbors, dropout=0.0):
+        super().__init__()
         self.config = config_file
         self.neighbors = neighbors
         self.dropout = dropout

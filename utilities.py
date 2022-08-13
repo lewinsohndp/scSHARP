@@ -13,6 +13,8 @@ from rpy2.robjects.conversion import localconverter
 import json
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
+from captum.attr import IntegratedGradients, DeepLift
+import math
 
 """General functions and definitions"""
 
@@ -55,11 +57,12 @@ def preprocess(data, normalize=True, scale=True, targetsum=1e4, run_pca=True, co
     if scale:
         new_data = sc.pp.scale(new_data)
     
+    pca = None
     if run_pca:
         pca = PCA(n_components=comps, random_state=8)
         new_data = pca.fit_transform(new_data)
 
-    return new_data, row_filter
+    return new_data, row_filter, col_filter, pca
 
 def mask_labels(labels, masking_pct):
     """method for masking labels"""
@@ -181,12 +184,18 @@ def pred_accuracy(preds, real):
     return float((torch.tensor(preds) == torch.tensor(real)).type(torch.FloatTensor).mean().numpy())
 
 def get_consensus_labels(encoded_y, necessary_vote):
-    """method that gets consensus vote of multiple prediction tools"""
+    """method that gets consensus vote of multiple prediction tools
+    If vote is < 1 then taken as threshold pct to be >= to
+    """
     confident_labels = np.zeros(shape = (encoded_y.shape[0],))
     for i in range(encoded_y.shape[0]):
         row = encoded_y[i,:]
+
+        if necessary_vote < 1:
+            row = row / row.sum()
+        
         max_index = np.argmax(row)
-        if row[max_index] > (necessary_vote-1):
+        if row[max_index] >= (necessary_vote):
             confident_labels[i] = max_index
         else: confident_labels[i] = -1
     
@@ -201,3 +210,36 @@ def filter_scores(scores, thresh = 0.5):
         if pct_na < thresh: keep_cols.append(col)
     
     return scores[keep_cols]
+
+def run_interpretation(model, X, pca_obj, predictions, genes):
+    """Method to run interpretation on model"""
+
+    prediction_names = predictions.unique().tolist()
+    classes = [None]*len(prediction_names)
+    for i, pred in enumerate(prediction_names):
+        classes[i] = np.where(predictions == pred)[0]
+    
+    # fix adding eval mode
+
+    dl = DeepLift(model)
+    baseline = torch.FloatTensor(np.full(X.shape, X.min()))
+
+    attributions = np.zeros((len(prediction_names), X.shape[0], X.shape[1]))
+
+    for i, pred_name in enumerate(prediction_names):
+        attributions[i] = dl.attribute(torch.FloatTensor(X), baseline, target=pred_name, return_convergence_delta=True)[0].detach()
+
+    mean_attributions = np.zeros((len(prediction_names), X.shape[1]))
+    for i in range(attributions.shape[0]):
+        mean_attributions[i] = torch.mean(torch.tensor(attributions[i]), 0)
+    
+    mean_attributions = torch.FloatTensor(mean_attributions.T)
+
+    cor_loadings = torch.tensor(pca_obj.components_.T * np.sqrt(pca_obj.explained_variance_))
+    gene_att_scores = torch.mm(cor_loadings, mean_attributions)
+    gene_att_scores = gene_att_scores.numpy()
+    att_df = pd.DataFrame(gene_att_scores)
+    att_df.index = genes
+    att_df.columns = prediction_names
+
+    return att_df
