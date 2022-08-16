@@ -11,15 +11,15 @@ class GCNModel(torch.nn.Module):
         self.config = config_file
         self.neighbors = neighbors
         self.dropout = dropout
-        self.method_weights = torch.nn.Parameter(torch.tensor(weights).float())
         self.layers = utilities.load_model(config_file)
         self.weights_mode = weights_mode
+        use_cuda = torch.cuda.is_available()
+        self.device = torch.device("cuda:0" if use_cuda else "cpu")
+        self.method_weights = torch.nn.Parameter(torch.tensor(weights).float().to(self.device))
         if learn_weights:
             self.opt = torch.optim.Adam([weight for item in self.layers for weight in list(item.parameters())] + [self.method_weights],0.0001)
         else:
             self.opt = torch.optim.Adam([weight for item in self.layers for weight in list(item.parameters())],0.0001)
-        use_cuda = torch.cuda.is_available()
-        self.device = torch.device("cuda:0" if use_cuda else "cpu")
 
     def forward(self, X, edge_index=None):
         """forward pass through model"""
@@ -54,9 +54,9 @@ class GCNModel(torch.nn.Module):
                 current = self.forward(current)
                 
                 #Yt = local_label.long()
-
+                self.method_weights = self.method_weights.to(self.device)
                 sft_weights = torch.softmax(self.method_weights,0)
-                
+                 
                 # get loss value 
                 #loss_func = torch.nn.CrossEntropyLoss(ignore_index=ignore_index_input)
                 
