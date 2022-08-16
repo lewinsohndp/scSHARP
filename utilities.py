@@ -214,6 +214,7 @@ def filter_scores(scores, thresh = 0.5):
 def run_interpretation(model, X, pca_obj, predictions, genes):
     """Method to run interpretation on model"""
 
+    predictions = predictions.cpu()
     prediction_names = predictions.unique().tolist()
     classes = [None]*len(prediction_names)
     for i, pred in enumerate(prediction_names):
@@ -227,7 +228,7 @@ def run_interpretation(model, X, pca_obj, predictions, genes):
     attributions = np.zeros((len(prediction_names), X.shape[0], X.shape[1]))
 
     for i, pred_name in enumerate(prediction_names):
-        attributions[i] = dl.attribute(torch.FloatTensor(X), baseline, target=pred_name, return_convergence_delta=True)[0].detach()
+        attributions[i] = dl.attribute(torch.FloatTensor(X).to(model.device), baseline.to(model.device), target=pred_name, return_convergence_delta=True)[0].cpu().detach()
 
     mean_attributions = np.zeros((len(prediction_names), X.shape[1]))
     for i in range(attributions.shape[0]):

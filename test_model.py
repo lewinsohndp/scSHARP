@@ -25,7 +25,7 @@ def test_model(data_folders, tool_list, votes, model_file, neighbors, nbatch, tr
         
         # read in dataset
         X = pd.read_csv(data_path, index_col=0)
-        X, keep_cells = utilities.preprocess(np.array(X), scale=False)
+        X, keep_cells,_,_ = utilities.preprocess(np.array(X), scale=False)
 
         all_labels = all_labels.loc[keep_cells,:]
 

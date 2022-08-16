@@ -119,10 +119,15 @@ class GCNModel(torch.nn.Module):
         return knn_graph(X, k=self.neighbors, loop=True)
 
     def to_device(self):
+    #    for layer in self.layers:
+    #        layer.to(self.device)
+        self.to(self.device)
+    
+
+    def to(self, device):
         """send layers to device"""
         for layer in self.layers:
             layer.to(self.device)
-
 
 
 
