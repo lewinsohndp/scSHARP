@@ -6,13 +6,18 @@ from sklearn.metrics import confusion_matrix
 class GCNModel(torch.nn.Module):
     """class for label propagation GCN model"""
 
-    def __init__(self, config_file, neighbors, dropout=0.0):
+    def __init__(self, config_file, neighbors, weights, weights_mode = True, learn_weights = True, dropout=0.0):
         super().__init__()
         self.config = config_file
         self.neighbors = neighbors
         self.dropout = dropout
+        self.method_weights = torch.nn.Parameter(torch.tensor(weights).float())
         self.layers = utilities.load_model(config_file)
-        self.opt = torch.optim.Adam([weight for item in self.layers for weight in list(item.parameters())],0.0001)
+        self.weights_mode = weights_mode
+        if learn_weights:
+            self.opt = torch.optim.Adam([weight for item in self.layers for weight in list(item.parameters())] + [self.method_weights],0.0001)
+        else:
+            self.opt = torch.optim.Adam([weight for item in self.layers for weight in list(item.parameters())],0.0001)
         use_cuda = torch.cuda.is_available()
         self.device = torch.device("cuda:0" if use_cuda else "cpu")
 
@@ -48,12 +53,22 @@ class GCNModel(torch.nn.Module):
                 current = local_batch.float()
                 current = self.forward(current)
                 
-                Yt = local_label.long()
-            
-                # get loss value 
-                loss_func = torch.nn.CrossEntropyLoss(ignore_index=ignore_index_input)
-                loss = loss_func(current, Yt.squeeze()) # in your training for-loop    
+                #Yt = local_label.long()
 
+                sft_weights = torch.softmax(self.method_weights,0)
+                
+                # get loss value 
+                #loss_func = torch.nn.CrossEntropyLoss(ignore_index=ignore_index_input)
+                
+                #loss = loss_func(current, Yt.squeeze()) # in your training for-loop   
+                if self.weights_mode: 
+                    loss_func = torch.nn.BCEWithLogitsLoss()
+                    loss = .15*torch.abs(sft_weights - (1/self.method_weights.shape[0])).sum() + \
+            loss_func(current, (local_label * sft_weights.unsqueeze(0).unsqueeze(-1)).sum(1)   )
+                else:
+                    loss_func = torch.nn.CrossEntropyLoss(ignore_index=ignore_index_input)
+                    Yt = local_label.long()
+                    loss = loss_func(current, Yt.squeeze()) # in your training for-loop
                 epoch_loss += loss
                 loss.backward()
                 self.opt.step()
