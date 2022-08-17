@@ -244,3 +244,36 @@ def run_interpretation(model, X, pca_obj, predictions, genes):
     att_df.columns = prediction_names
 
     return att_df
+
+def weighted_encode(df, encoded_y, tool_weights):
+    """More advanced consensus method
+    df: cells x tools
+    tool_weights: cell_types x tools
+    """
+    final_encode = np.zeros(encoded_y.shape)
+    votes = df.to_numpy()
+    for i in range(encoded_y.shape[0]):
+        votes_row = votes[i,:]
+        row = encoded_y[i,:]
+        row = row / row.sum()
+        max_index = np.argmax(row)
+        
+        if np.argwhere(row == row[max_index]).flatten().shape[0] > 1:
+            #do something
+            #maybe weight be average in this case?
+            print('multiple maxes')
+            continue
+        
+        # max index is winning cell type
+        # for that winner, use weights of tools for it
+        weights = tool_weights[max_index]
+        weighted_encode = np.zeros(encoded_y.shape[1])
+        for j in range(votes_row.shape[0]):
+            encode = np.zeros(encoded_y.shape[1])
+            encode[votes_row[j]] = 1
+            encode = encode * weights[j]
+            weighted_encode += encode
+        
+        final_encode[i,:] = weighted_encode
+    
+    return final_encode
