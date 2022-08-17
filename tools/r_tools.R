@@ -7,7 +7,7 @@ run_scina <- function(data, markers=NULL, ref=NULL){
     return(F)
   }
   print("Running SCINA")  
-  results <- SCINA(as.matrix(data@assays$RNA@data), markers)
+  results <- SCINA(as.matrix(data@assays$RNA@data), markers, rm_overlap=F)
   scina_preds <- results$cell_labels
   
   scina_preds = replace(scina_preds, scina_preds=="unknown", NA)

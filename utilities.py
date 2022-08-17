@@ -236,7 +236,7 @@ def run_interpretation(model, X, pca_obj, predictions, genes):
     
     mean_attributions = torch.FloatTensor(mean_attributions.T)
 
-    cor_loadings = torch.tensor(pca_obj.components_.T * np.sqrt(pca_obj.explained_variance_))
+    cor_loadings = torch.FloatTensor(pca_obj.components_.T * np.sqrt(pca_obj.explained_variance_))
     gene_att_scores = torch.mm(cor_loadings, mean_attributions)
     gene_att_scores = gene_att_scores.numpy()
     att_df = pd.DataFrame(gene_att_scores)
