@@ -195,7 +195,8 @@ def get_consensus_labels(encoded_y, necessary_vote):
         row = encoded_y[i,:]
 
         if necessary_vote < 1:
-            row = row / row.sum()
+            if row.sum() != 0: 
+                row = row / row.sum()
         
         max_index = np.argmax(row)
         if row[max_index] >= (necessary_vote):
