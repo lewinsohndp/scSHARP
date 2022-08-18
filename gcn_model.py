@@ -6,8 +6,9 @@ from sklearn.metrics import confusion_matrix
 class GCNModel(torch.nn.Module):
     """class for label propagation GCN model"""
 
-    def __init__(self, config_file, neighbors, target_types, dropout=0.0):
+    def __init__(self, config_file, neighbors, target_types, seed=8, dropout=0.0):
         super().__init__()
+        torch.manual_seed(seed)
         self.config = config_file
         self.neighbors = neighbors
         self.dropout = dropout

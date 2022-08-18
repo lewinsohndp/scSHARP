@@ -85,7 +85,7 @@ test_accuracies = [0]*random_inits
 total_accuracies = [0]*random_inits
 
 for i in range(random_inits):
-    m = GCNModel(gcn_file, neighbors, targets, dropout=dropout)
+    m = GCNModel(gcn_file, neighbors, targets, seed=i, dropout=dropout)
     m.train(dataloader, training_epochs, verbose=False)
     metrics = m.validation_metrics(test_dataloader, validation_nodes, test_nodes)
     total_accuracies[i] = metrics[0]

@@ -56,7 +56,7 @@ def test_model(data_folders, tool_list, votes, model_file, neighbors, nbatch, tr
         total_accuracies = [0]*random_inits
 
         for i in range(random_inits):
-            m = GCNModel(model_file, neighbors)
+            m = GCNModel(model_file, neighbors, target_types=len(marker_names), seed=i)
             m.train(dataloader, training_epochs, verbose=False)
             metrics = m.validation_metrics(test_dataloader, train_nodes, test_nodes)
             total_accuracies[i] = metrics[0]

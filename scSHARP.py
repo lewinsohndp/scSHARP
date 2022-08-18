@@ -16,8 +16,12 @@ class scSCHARP:
         self.neighbors = neighbors
         self.config = config
         self.model = None
+        self.final_preds = None
+        self.genes = None
+        self.X = None
+        self.pca_obj = None
     
-    def run_prediction(self, training_epochs=150, thresh=0.51):
+    def run_prediction(self, training_epochs=150, thresh=0.51, batch_size=40):
         """Trains GCN modle on consensus labels and returns predictions"""
 
         if os.path.exists(self.preds_path):
@@ -30,8 +34,8 @@ class scSCHARP:
         
         # read in dataset
         counts = pd.read_csv(self.data_path, index_col=0)
-        X, keep_cells,keep_genes,pca_obj = utilities.preprocess(np.array(counts), scale=False, comps=500)
-
+        self.X, keep_cells,keep_genes,self.pca_obj = utilities.preprocess(np.array(counts), scale=False, comps=500)
+        self.genes = counts.columns.to_numpy()[keep_genes]
         all_labels = all_labels.loc[keep_cells,:]
 
         _,marker_names = utilities.read_marker_file(self.marker_path)
@@ -44,15 +48,24 @@ class scSCHARP:
         train_nodes = np.where(confident_labels != -1)[0]
         test_nodes = np.where(confident_labels == -1)[0]
 
-        dataset  = torch.utils.data.TensorDataset(torch.tensor(X), torch.tensor(confident_labels))
-        dataloader = torch.utils.data.DataLoader(dataset, batch_size=50, shuffle=True)
-        test_dataloader = torch.utils.data.DataLoader(dataset, batch_size=50, shuffle=False)
+        dataset  = torch.utils.data.TensorDataset(torch.tensor(self.X), torch.tensor(confident_labels))
+        dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
+        test_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=False)
 
         self.model = GCNModel(self.config, neighbors=self.neighbors, target_types=len(marker_names))
         self.model.train(dataloader, epochs=training_epochs, verbose=True)
 
         preds,_ = self.model.predict(test_dataloader)
-        final_preds = preds.max(dim=1)[1]
+        self.final_preds = preds.max(dim=1)[1]
 
-        return final_preds
+        return self.final_preds
+
+    def run_interpretation(self):
+        """Runs model gradient based interpretation"""
+        
+        int_df = utilities.run_interpretation(self.model, self.X, self.pca_obj, self.final_preds, self.genes)
+
+        return int_df
+
+
 

@@ -15,6 +15,7 @@ import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
 from captum.attr import IntegratedGradients, DeepLift
 import math
+from sklearn.metrics import confusion_matrix
 
 """General functions and definitions"""
 
@@ -279,3 +280,21 @@ def weighted_encode(df, encoded_y, tool_weights):
         final_encode[i,:] = weighted_encode
     
     return final_encode
+
+def validation_metrics(real_y, preds, train_nodes, test_nodes):
+    all_equality = (real_y == preds)
+    all_accuracy = all_equality.type(torch.FloatTensor).mean()
+
+    all_cm = confusion_matrix(real_y, preds)
+
+    train_equality = (real_y[train_nodes] == preds[train_nodes])
+    train_accuracy = train_equality.type(torch.FloatTensor).mean()
+
+    train_cm = confusion_matrix(real_y[train_nodes], preds[train_nodes])
+
+    test_equality = (real_y[test_nodes] == preds[test_nodes])
+    test_accuracy = test_equality.type(torch.FloatTensor).mean()
+
+    test_cm = confusion_matrix(real_y[test_nodes], preds[test_nodes])
+
+    return float(all_accuracy), all_cm, float(train_accuracy), train_cm, float(test_accuracy), test_cm
