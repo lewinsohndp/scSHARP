@@ -107,7 +107,7 @@ def label_counts(data_path, tools, ref_path, ref_label_path, marker_path):
     
     return preds
 
-def load_model(file_path):
+def load_model(file_path, target_types):
         """loads model from json format"""
         
         f = open(file_path)
@@ -131,8 +131,10 @@ def load_model(file_path):
             else:
                 raise Exception("Unrecognizable layer type:" + layer['type'])
             
+            final_output = layer['output']
             final_layers.append(new_layer)
         
+        final_layers.append(torch.nn.Linear(final_output,target_types))
         return final_layers
 
 def factorize_df(df, all_cells):

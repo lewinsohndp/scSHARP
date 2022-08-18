@@ -6,12 +6,12 @@ from sklearn.metrics import confusion_matrix
 class GCNModel(torch.nn.Module):
     """class for label propagation GCN model"""
 
-    def __init__(self, config_file, neighbors, dropout=0.0):
+    def __init__(self, config_file, neighbors, target_types, dropout=0.0):
         super().__init__()
         self.config = config_file
         self.neighbors = neighbors
         self.dropout = dropout
-        self.layers = utilities.load_model(config_file)
+        self.layers = utilities.load_model(config_file, target_types)
         self.opt = torch.optim.Adam([weight for item in self.layers for weight in list(item.parameters())],0.0001)
         use_cuda = torch.cuda.is_available()
         self.device = torch.device("cuda:0" if use_cuda else "cpu")

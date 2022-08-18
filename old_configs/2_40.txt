@@ -8,7 +8,12 @@
 			{
 					"type" : "EdgeConv",
 					"input" : 1000,
-					"output" : 25
+					"output" : 40
+			},
+			{
+					"type" : "Linear",
+					"input" : 40,
+					"output" : 4
 			}
 		]
 }

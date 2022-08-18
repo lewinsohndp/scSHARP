@@ -19,11 +19,6 @@
 					"type" : "EdgeConv",
 					"input" : 1000,
 					"output" : 25
-			},
-			{
-					"type" : "Linear",
-					"input" : 25,
-					"output" : 4
 			}
 		]
 }

@@ -24,8 +24,9 @@ gcn_file = "configs/" + config['config']
 dropout = float(config['dropout'])
 batch_size = int(config['batch_size'])
 neighbors = int(config['neighbors'])
+targets = 4
 tools = ["sctype","scsorter","scina","singler", "scpred"]
-votes = 3
+votes = int(config["votes"])
 training_epochs = 150
 data_path = data_folder + "query_counts.csv"
 ref_path = data_folder + "ref_counts.csv"
@@ -39,7 +40,7 @@ else:
 
 # read in dataset
 X = pd.read_csv(data_path, index_col=0)
-X, keep_cells = utilities.preprocess(np.array(X), scale=False)
+X, keep_cells,_,_ = utilities.preprocess(np.array(X), scale=False)
 
 all_labels = all_labels.loc[keep_cells,:]
 
@@ -84,7 +85,7 @@ test_accuracies = [0]*random_inits
 total_accuracies = [0]*random_inits
 
 for i in range(random_inits):
-    m = GCNModel(gcn_file, neighbors, dropout=dropout)
+    m = GCNModel(gcn_file, neighbors, targets, dropout=dropout)
     m.train(dataloader, training_epochs, verbose=False)
     metrics = m.validation_metrics(test_dataloader, validation_nodes, test_nodes)
     total_accuracies[i] = metrics[0]
