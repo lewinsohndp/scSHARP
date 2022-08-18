@@ -1,0 +1,72 @@
+---
+title: "Seurat pbmc vignette"
+author: "Daniel Lewinsohn"
+date: '2022-08-17'
+output: html_document
+---
+
+```{r}
+library(dplyr)
+library(Seurat)
+library(patchwork)
+
+# Load the PBMC dataset
+```
+
+
+```{r}
+pbmc.data <- Read10X(data.dir = "~/desktop/filtered_gene_bc_matrices/hg19/")
+# Initialize the Seurat object with the raw (non-normalized data).
+pbmc <- CreateSeuratObject(counts = pbmc.data, project = "pbmc3k", min.cells = 3, min.features = 200)
+pbmc
+```
+
+```{r}
+# The [[ operator can add columns to object metadata. This is a great place to stash QC stats
+pbmc[["percent.mt"]] <- PercentageFeatureSet(pbmc, pattern = "^MT-")
+pbmc <- subset(pbmc, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt < 5)
+```
+
+```{r}
+pbmc <- NormalizeData(pbmc, normalization.method = "LogNormalize", scale.factor = 10000)
+pbmc <- FindVariableFeatures(pbmc, selection.method = "vst", nfeatures = 2000)
+all.genes <- rownames(pbmc)
+pbmc <- ScaleData(pbmc, features = all.genes)
+pbmc <- RunPCA(pbmc, features = VariableFeatures(object = pbmc))
+pbmc <- FindNeighbors(pbmc, dims = 1:10)
+pbmc <- FindClusters(pbmc, resolution = 0.5)
+pbmc <- RunUMAP(pbmc, dims = 1:10)
+DimPlot(pbmc, reduction = "umap")
+```
+
+```{r}
+new.cluster.ids <- c("Naive CD4 T", "CD14+ Mono", "Memory CD4 T", "B", "CD8 T", "FCGR3A+ Mono",
+    "NK", "DC", "Platelet")
+names(new.cluster.ids) <- levels(pbmc)
+pbmc <- RenameIdents(pbmc, new.cluster.ids)
+DimPlot(pbmc, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend()
+```
+
+```{r}
+pbmc <- RenameIdents(object = pbmc, `Memory CD4 T` = "t_cell")
+pbmc <- RenameIdents(object = pbmc, `Naive CD4 T` = "t_cell")
+pbmc <- RenameIdents(object = pbmc, `CD8 T` = "t_cell")
+pbmc <- RenameIdents(object = pbmc, `NK` = "cd56_nk")
+pbmc <- RenameIdents(object = pbmc, `B` = "b_cells")
+#pbmc <- RenameIdents(object = pbmc, `FCGR3A+ Mono` = "cd14_monocytes")
+pbmc <- RenameIdents(object = pbmc, `CD14+ Mono` = "cd14_monocytes")
+pbmc <- subset(x = pbmc, idents = c("t_cell", "cd56_nk", "b_cells","cd14_monocytes"))
+DimPlot(pbmc, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend()
+```
+```{r}
+FeaturePlot(pbmc, features=c("CD14","CD4","CD8"))
+
+```
+
+```{r}
+#write.csv(t(as.matrix(GetAssayData(object = pbmc, slot = "counts"))), paste("~/desktop/pbmc_ref_counts.csv",sep=""))
+write.csv(Idents(pbmc), paste("~/desktop/pbmc_ref_meta.csv",sep=""))
+```
+
+
+
