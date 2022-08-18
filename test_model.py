@@ -6,7 +6,7 @@ import utilities
 import statistics
 import os
 
-def test_model(data_folders, tool_list, votes, model_file, neighbors, nbatch, training_epochs, random_inits):
+def test_model(data_folders, tool_list, votes, model_file, neighbors, nbatch, training_epochs, random_inits, markers="markers.txt", meta="querry_meta.csv", meta_col = "Group", preds ="preds.csv"):
     
     final_df = pd.DataFrame({"data_name":[], "method":[], "total_accuracy":[],"train_accuracy":[], "test_accuracy":[], "total_sd":[], "train_sd":[], "test_sd":[]})
     # for all datasets
@@ -16,10 +16,12 @@ def test_model(data_folders, tool_list, votes, model_file, neighbors, nbatch, tr
         tools = tool_list
         ref_path = data_folder + "ref_counts.csv"
         ref_label_path = data_folder + "ref_labels.csv"
-        marker_path = data_folder + "markers.txt"
-        if os.path.exists(data_folder + "preds.csv"):
-            all_labels = pd.read_csv(data_folder + "preds.csv", index_col=0)
-            if all_labels.shape[1] != len(tools): raise Exception("wrong amount of tools in file")
+        marker_path = data_folder + markers
+        if os.path.exists(data_folder + preds):
+            all_labels = pd.read_csv(data_folder + preds, index_col=0)
+            if all_labels.shape[1] != len(tools): 
+                all_labels = all_labels[tools]
+                #raise Exception("wrong amount of tools in file")
         else:
             all_labels = utilities.label_counts(data_path,tools,ref_path,ref_label_path,marker_path)
         
@@ -34,9 +36,9 @@ def test_model(data_folders, tool_list, votes, model_file, neighbors, nbatch, tr
         all_labels_factored = utilities.factorize_df(all_labels, marker_names)
         encoded_labels = utilities.encode_predictions(all_labels_factored)
 
-        meta_path = data_folder + "query_meta.csv"
+        meta_path = data_folder + meta
         metadata = pd.read_csv(meta_path, index_col=0)
-        real_y = pd.factorize(metadata['Group'], sort=True)[0]
+        real_y = pd.factorize(metadata[meta_col], sort=True)[0]
         real_y = real_y[keep_cells]
 
         confident_labels = utilities.get_consensus_labels(encoded_labels, necessary_vote = votes)
