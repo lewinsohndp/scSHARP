@@ -5,7 +5,7 @@ import torch
 import os
 from gcn_model import GCNModel
 
-class scSCHARP:
+class scSHARP:
     """Class that runs predictions"""
 
     def __init__(self, data_path, tool_preds, tool_list, marker_path, neighbors=2, config="2_40.txt"):
@@ -21,7 +21,7 @@ class scSCHARP:
         self.X = None
         self.pca_obj = None
     
-    def run_prediction(self, training_epochs=150, thresh=0.51, batch_size=40):
+    def run_prediction(self, training_epochs=150, thresh=0.51, batch_size=40, seed=8):
         """Trains GCN modle on consensus labels and returns predictions"""
 
         if os.path.exists(self.preds_path):
@@ -52,13 +52,13 @@ class scSCHARP:
         dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
         test_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=False)
 
-        self.model = GCNModel(self.config, neighbors=self.neighbors, target_types=len(marker_names))
+        self.model = GCNModel(self.config, neighbors=self.neighbors, target_types=len(marker_names), seed=seed)
         self.model.train(dataloader, epochs=training_epochs, verbose=True)
 
         preds,_ = self.model.predict(test_dataloader)
         self.final_preds = preds.max(dim=1)[1]
 
-        return self.final_preds
+        return self.final_preds, train_nodes, test_nodes
 
     def run_interpretation(self):
         """Runs model gradient based interpretation"""

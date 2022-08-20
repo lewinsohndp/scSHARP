@@ -6,13 +6,13 @@ import utilities
 import statistics
 import os
 
-def test_model(data_folders, tool_list, votes, model_file, neighbors, nbatch, training_epochs, random_inits, markers="markers.txt", meta="querry_meta.csv", meta_col = "Group", preds ="preds.csv"):
+def test_model(data_folders, tool_list, votes, model_file, neighbors, nbatch, training_epochs, random_inits, markers="markers.txt", counts="query_counts.csv", meta="query_meta.csv", meta_col = "Group", preds ="preds.csv"):
     
     final_df = pd.DataFrame({"data_name":[], "method":[], "total_accuracy":[],"train_accuracy":[], "test_accuracy":[], "total_sd":[], "train_sd":[], "test_sd":[]})
     # for all datasets
     for data_folder in data_folders:
         # get labels
-        data_path = data_folder + "query_counts.csv"
+        data_path = data_folder + counts
         tools = tool_list
         ref_path = data_folder + "ref_counts.csv"
         ref_label_path = data_folder + "ref_labels.csv"
@@ -38,7 +38,9 @@ def test_model(data_folders, tool_list, votes, model_file, neighbors, nbatch, tr
 
         meta_path = data_folder + meta
         metadata = pd.read_csv(meta_path, index_col=0)
-        real_y = pd.factorize(metadata[meta_col], sort=True)[0]
+        if type(meta_col)==int:
+            real_y = pd.factorize(metadata.iloc[:,meta_col], sort=True)[0]
+        else: real_y = pd.factorize(metadata[meta_col], sort=True)[0]
         real_y = real_y[keep_cells]
 
         confident_labels = utilities.get_consensus_labels(encoded_labels, necessary_vote = votes)
@@ -67,7 +69,7 @@ def test_model(data_folders, tool_list, votes, model_file, neighbors, nbatch, tr
         # max of columns pred.
         max_pred = torch.tensor(encoded_labels).max(dim=1)[1]
 
-        dataset_names = ["GCN", "Max Col.", "Confident Labels"] + tool_list
+        dataset_names = ["GCN", "Max Col.", "Confident Labels"] + tool_list + ["Tool Avg."]
         # full dataset accuracy
         all = []
         all.append(statistics.mean(total_accuracies))
@@ -75,6 +77,7 @@ def test_model(data_folders, tool_list, votes, model_file, neighbors, nbatch, tr
         all.append(None)
         for tool in tool_list:
             all.append(utilities.pred_accuracy(np.array(all_labels_factored[tool]), real_y))
+        all.append(statistics.mean(all[3:]))
 
         # train set accuracy
         all_trains = []
@@ -83,6 +86,7 @@ def test_model(data_folders, tool_list, votes, model_file, neighbors, nbatch, tr
         all_trains.append(utilities.pred_accuracy(confident_labels[train_nodes], real_y[train_nodes]))
         for tool in tool_list:
             all_trains.append(utilities.pred_accuracy(np.array(all_labels_factored[tool][train_nodes]), real_y[train_nodes]))
+        all_trains.append(statistics.mean(all_trains[3:])) 
 
         # test set accuracy
         all_tests = []
@@ -91,7 +95,8 @@ def test_model(data_folders, tool_list, votes, model_file, neighbors, nbatch, tr
         all_tests.append(None)
         for tool in tool_list:
             all_tests.append(utilities.pred_accuracy(np.array(all_labels_factored[tool][test_nodes]), real_y[test_nodes]))
-        
+        all_tests.append(statistics.mean(all_tests[3:]))        
+
         # sds
         all_sds = [0]*len(dataset_names)
         train_sds = [0]*len(dataset_names)
@@ -100,6 +105,10 @@ def test_model(data_folders, tool_list, votes, model_file, neighbors, nbatch, tr
         all_sds[0] = statistics.stdev(total_accuracies)
         train_sds[0] = statistics.stdev(train_accuracies)
         test_sds[0] = statistics.stdev(test_accuracies)
+
+        all_sds[-1] = statistics.stdev(all[3:-1])
+        train_sds[-1] = statistics.stdev(all_trains[3:-1])
+        test_sds[-1] = statistics.stdev(all_tests[3:-1])
 
         data_name = [data_folder.split("/")[-2]]*len(dataset_names)
         df = pd.DataFrame({"data_name":data_name, "method":dataset_names, "total_accuracy":all,"train_accuracy":all_trains, "test_accuracy":all_tests, "total_sd":all_sds, "train_sd":train_sds, "test_sd":test_sds})

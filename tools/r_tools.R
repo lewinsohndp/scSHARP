@@ -6,8 +6,9 @@ run_scina <- function(data, markers=NULL, ref=NULL){
   if(is.null(markers)){
     return(F)
   }
-  print("Running SCINA")  
-  results <- SCINA(as.matrix(data@assays$RNA@data), markers, rm_overlap=F)
+  print("Running SCINA") 
+  norm_counts <- GetAssayData(object = data, slot = "data") 
+  results <- SCINA(norm_counts, markers, rm_overlap=F)
   scina_preds <- results$cell_labels
   
   scina_preds = replace(scina_preds, scina_preds=="unknown", NA)
@@ -35,7 +36,8 @@ run_scsorter <- function(data, markers=NULL, ref=NULL){
   
   topgenes <- head(VariableFeatures(data), 2000)
   picked_genes <- unique(c(topgenes, anno$Marker))
-  expr <- as.matrix(data@assays$RNA@data)
+  #expr <- as.matrix(data@assays$RNA@data)
+  expr <- as.matrix(GetAssayData(object = data, slot = "data"))
   expr <- expr[rownames(expr) %in% picked_genes,]
   
   rts <- scSorter(expr, anno)
@@ -52,7 +54,8 @@ run_sctype <- function(data, markers=NULL, ref=NULL){
   print("Running scType")
   source("https://raw.githubusercontent.com/IanevskiAleksandr/sc-type/master/R/gene_sets_prepare.R")
   source("https://raw.githubusercontent.com/IanevskiAleksandr/sc-type/master/R/sctype_score_.R")
-  es.max = sctype_score(scRNAseqData = as.matrix(data@assays$RNA@data), scaled = F, 
+  norm_counts <- as.matrix(GetAssayData(object = data, slot = "data"))
+  es.max = sctype_score(scRNAseqData = norm_counts, scaled = F, 
                         gs = markers, gs2 = NULL, gene_names_to_uppercase = F) 
   cL_resutls = do.call("rbind", lapply(unique(data@meta.data$seurat_clusters), function(cl){
     es.max.cl = sort(rowSums(es.max[ ,rownames(data@meta.data[data@meta.data$seurat_clusters==cl, ])]), decreasing = !0)
@@ -72,7 +75,8 @@ run_sctype <- function(data, markers=NULL, ref=NULL){
 }
 
 run_singler <- function(data, ref, ref_labels){
-  results <- SingleR(as.matrix(data@assays$RNA@data), as.matrix(ref@assays$RNA@data), ref_labels[,1])
+  norm_counts <- as.matrix(GetAssayData(object = data, slot = "data"))
+  results <- SingleR(norm_counts, as.matrix(ref@assays$RNA@data), ref_labels[,1])
   return(results$pruned.labels)
 }
 

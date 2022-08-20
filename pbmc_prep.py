@@ -1,27 +1,32 @@
 import pandas as pd
 import numpy as np
 from scipy.io import mmread
+import random
 
 """Script to read in and combine all pbmcs, then split"""
-output_path = "/home/groups/ConradLab/daniel/sharp_data/pbmc_10x_test/"
+output_path = "/home/groups/ConradLab/daniel/sharp_data/pbmc_10x_new/"
 data_path = "/home/groups/ConradLab/daniel/sharp_data/pbmc_10x/"
 cell_types = ["b_cells", "cd14_monocytes", "cd34","cd4_t_helper", "cd56_nk", "cytotoxic_t", "memory_t", "naive_cytotoxic", "naive_t", "regulatory_t"]
 
+random.seed(8)
+random_suffixes=random.sample(range(10,100),len(cell_types))
 final_df = None
 labels = []
 for i, cell_type in enumerate(cell_types):
     temp_data = mmread(data_path + cell_type + "_filtered_gene_bc_matrices/hg19/matrix.mtx").toarray()
     temp_genes = pd.read_csv(data_path + cell_type + "_filtered_gene_bc_matrices/hg19/genes.tsv", sep="/t", header=None).to_numpy().flatten()
     temp_cells = pd.read_csv(data_path + cell_type + "_filtered_gene_bc_matrices/hg19/barcodes.tsv", sep="/t", header=None).to_numpy().flatten()
-    
+        
     if i == 0:
         final_df = pd.DataFrame(temp_data)
         final_df.index = temp_genes
         final_df.columns = temp_cells
+        final_df = final_df.add_suffix("-" + str(random_suffixes[i]))
     else:
         temp_df = pd.DataFrame(temp_data)
         temp_df.index = temp_genes
         temp_df.columns = temp_cells
+        temp_df = temp_df.add_suffix("-" + str(random_suffixes[i]))
         final_df = final_df.merge(temp_df, how='inner', left_index=True, right_index=True)
     
     labels += [cell_type]*len(temp_cells)
