@@ -50,10 +50,9 @@ class GCNModel(torch.nn.Module):
                 current = self.forward(current)
                 
                 Yt = local_label.long()
-            
                 # get loss value 
                 loss_func = torch.nn.CrossEntropyLoss(ignore_index=ignore_index_input)
-                loss = loss_func(current, Yt.squeeze()) # in your training for-loop    
+                loss = loss_func(current, Yt) # in your training for-loop    
 
                 epoch_loss += loss
                 loss.backward()

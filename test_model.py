@@ -46,7 +46,7 @@ def test_model(data_folders, tool_list, votes, model_file, neighbors, nbatch, tr
         confident_labels = utilities.get_consensus_labels(encoded_labels, necessary_vote = votes)
         train_nodes = np.where(confident_labels != -1)[0]
         test_nodes = np.where(confident_labels == -1)[0]
-
+        
         dataset  = torch.utils.data.TensorDataset(torch.tensor(X), torch.tensor(confident_labels))
         dataloader = torch.utils.data.DataLoader(dataset, batch_size=nbatch, shuffle=True)
 
@@ -59,7 +59,7 @@ def test_model(data_folders, tool_list, votes, model_file, neighbors, nbatch, tr
 
         for i in range(random_inits):
             m = GCNModel(model_file, neighbors, target_types=len(marker_names), seed=i)
-            m.train(dataloader, training_epochs, verbose=False)
+            m.train(dataloader, training_epochs, verbose=True)
             metrics = m.validation_metrics(test_dataloader, train_nodes, test_nodes)
             total_accuracies[i] = metrics[0]
             train_accuracies[i] = metrics[2]
@@ -117,14 +117,17 @@ def test_model(data_folders, tool_list, votes, model_file, neighbors, nbatch, tr
     return final_df
 
 if __name__ == "__main__":
-    data_folders = ["simulations/splat_0.2_de_rq/"]
-    tools = ["sctype","scsorter","scina","singler", "scpred"]
-    votes_necessary = 3
-    model_file = "configs/semi_basic_linear.txt"
-    neighbors = 2
-    batch_size=35
-    training_epochs=1
-    random_inits = 2
-
-    df = test_model(data_folders, tools, votes_necessary, model_file, neighbors, batch_size, training_epochs, random_inits)
-    print(df.head)
+    
+    data_folders = ["/home/groups/ConradLab/daniel/sharp_data/pbmc_test/"]
+    tools = ["sctype","scsorter","scina", "singler", "scpred"]
+    votes_necessary = .51
+    model_file = "configs/2_40.txt"
+    neighbors = 5
+    batch_size=50
+    training_epochs=150
+    random_inits = 5
+    counts="counts.csv"
+    meta="labels_cd4-8.csv"
+    meta_col = 0
+    df = test_model(data_folders, tools, votes_necessary, model_file, neighbors, batch_size, training_epochs, random_inits, counts=counts, meta=meta, meta_col=meta_col)
+    df.to_csv("pbmc_test_results.csv")

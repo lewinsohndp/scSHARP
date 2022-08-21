@@ -1,10 +1,11 @@
 #!/bin/bash
 #SBATCH --mem=16g
-#SBATCH --array=1-216%100
+#SBATCH --array=75,201
 #SBATCH --partition=gpu
-#SBATCH --time=30
+#SBATCH --time=60
 #SBATCH --output=log-%j.out
 #SBATCH --error=log-%j.err
 #SBATCH --gres=gpu:2
 
-python -u test_config.py /home/groups/ConradLab/daniel/sharp_data/jung/ grid_search_jung_output/ ${SLURM_ARRAY_TASK_ID}.txt
+# real array is 1-216
+python -u test_config.py /home/groups/ConradLab/daniel/sharp_data/pbmc_test_grid/ grid_search_pbmc_output/ ${SLURM_ARRAY_TASK_ID}.txt

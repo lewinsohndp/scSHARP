@@ -1,0 +1,25 @@
+,data_name,method,total_accuracy,train_accuracy,test_accuracy,total_sd,train_sd,test_sd
+0,pbmc_test,GCN,0.930185604095459,0.9373441100120544,0.681247079372406,0.000749159593735367,0.00020720607515295776,0.019805366547047263
+1,pbmc_test,Max Col.,0.9213459491729736,0.9375234246253967,0.35877153277397156,0.0,0.0,0.0
+2,pbmc_test,Confident Labels,,0.9375234246253967,,0.0,0.0,0.0
+3,pbmc_test,sctype,0.9711372256278992,0.9737595915794373,0.8799441456794739,0.0,0.0,0.0
+4,pbmc_test,scsorter,0.7148190140724182,0.7160118818283081,0.6733364462852478,0.0,0.0,0.0
+5,pbmc_test,scina,0.733328104019165,0.7535192370414734,0.03117729164659977,0.0,0.0,0.0
+6,pbmc_test,singler,0.702813446521759,0.7199593186378479,0.10656119138002396,0.0,0.0,0.0
+7,pbmc_test,scpred,0.7441760897636414,0.761534571647644,0.14053048193454742,0.0,0.0,0.0
+8,pbmc_test,Tool Avg.,0.7732547760009766,0.7849569201469422,0.36630991138517854,0.11177420562249028,0.10742612528966368,0.3836811960769129
+
+srun --partition=gpu --mem=130g --time=500 python -u test_model.py
+data_folders = ["/home/groups/ConradLab/daniel/sharp_data/pbmc_test/"]
+    tools = ["sctype","scsorter","scina", "singler", "scpred"]
+    votes_necessary = .51
+    model_file = "configs/2_40.txt"
+    neighbors = 5
+    batch_size=50
+    training_epochs=150
+    random_inits = 5
+    counts="counts.csv"
+    meta="labels_cd4-8.csv"
+    meta_col = 0
+    df = test_model(data_folders, tools, votes_necessary, model_file, neighbors, batch_size, training_epochs, random_inits, counts=counts, meta=meta, meta_col=meta_col)
+    df.to_csv("pbmc_test_results.csv")
