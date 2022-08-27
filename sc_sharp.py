@@ -4,6 +4,7 @@ import pandas as pd
 import torch
 import os
 from gcn_model import GCNModel
+import torch
 
 class scSHARP:
     """Class that runs predictions"""
@@ -52,13 +53,13 @@ class scSHARP:
         dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
         test_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=False)
 
-        self.model = GCNModel(self.config, neighbors=self.neighbors, target_types=len(marker_names), seed=seed)
+        if self.model == None: self.model = GCNModel(self.config, neighbors=self.neighbors, target_types=len(marker_names), seed=seed)
         self.model.train(dataloader, epochs=training_epochs, verbose=True)
 
         preds,_ = self.model.predict(test_dataloader)
         self.final_preds = preds.max(dim=1)[1]
 
-        return self.final_preds, train_nodes, test_nodes
+        return self.final_preds, train_nodes, test_nodes, keep_cells
 
     def run_interpretation(self):
         """Runs model gradient based interpretation"""
@@ -67,5 +68,12 @@ class scSHARP:
 
         return int_df
 
+    def save_model(self, file_path):
+        """Save model as serialized object at specified path"""
 
+        torch.save(self.model, file_path)
 
+    def load_model(self, file_path):
+        """Load model as serialized object at specified path"""
+
+        self.model = torch.load(file_path)
