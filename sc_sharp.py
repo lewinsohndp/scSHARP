@@ -16,6 +16,7 @@ class scSHARP:
         self.marker_path = marker_path
         self.neighbors = neighbors
         self.config = config
+        self.cell_names = None
         self.model = None
         self.final_preds = None
         self.genes = None
@@ -41,6 +42,9 @@ class scSHARP:
 
         _,marker_names = utilities.read_marker_file(self.marker_path)
 
+        self.cell_names = marker_names.copy()
+        self.cell_names.sort()
+
         all_labels_factored = utilities.factorize_df(all_labels, marker_names)
         encoded_labels = utilities.encode_predictions(all_labels_factored)
 
@@ -65,7 +69,8 @@ class scSHARP:
         """Runs model gradient based interpretation"""
         
         int_df = utilities.run_interpretation(self.model, self.X, self.pca_obj, self.final_preds, self.genes)
-
+        int_df.columns = self.cell_names
+        
         return int_df
 
     def save_model(self, file_path):
