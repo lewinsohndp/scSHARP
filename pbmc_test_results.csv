@@ -8,18 +8,3 @@
 6,pbmc_test,singler,0.702813446521759,0.7199593186378479,0.10656119138002396,0.0,0.0,0.0
 7,pbmc_test,scpred,0.7441760897636414,0.761534571647644,0.14053048193454742,0.0,0.0,0.0
 8,pbmc_test,Tool Avg.,0.7732547760009766,0.7849569201469422,0.36630991138517854,0.11177420562249028,0.10742612528966368,0.3836811960769129
-
-srun --partition=gpu --mem=130g --time=500 python -u test_model.py
-data_folders = ["/home/groups/ConradLab/daniel/sharp_data/pbmc_test/"]
-    tools = ["sctype","scsorter","scina", "singler", "scpred"]
-    votes_necessary = .51
-    model_file = "configs/2_40.txt"
-    neighbors = 5
-    batch_size=50
-    training_epochs=150
-    random_inits = 5
-    counts="counts.csv"
-    meta="labels_cd4-8.csv"
-    meta_col = 0
-    df = test_model(data_folders, tools, votes_necessary, model_file, neighbors, batch_size, training_epochs, random_inits, counts=counts, meta=meta, meta_col=meta_col)
-    df.to_csv("pbmc_test_results.csv")
