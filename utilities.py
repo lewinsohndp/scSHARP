@@ -215,9 +215,11 @@ def filter_scores(scores, thresh = 0.5):
     
     return scores[keep_cols]
 
-def run_interpretation(model, X, pca_obj, predictions, genes):
+def run_interpretation(model, X, pca_obj, predictions, genes, batch_size):
     """Method to run interpretation on model"""
-
+    
+    dataset  = torch.utils.data.TensorDataset(torch.FloatTensor(X), torch.zeros(X.shape[0]))
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=False)
     predictions = predictions.cpu()
     prediction_names = predictions.unique().tolist()
     classes = [None]*len(prediction_names)
@@ -232,8 +234,18 @@ def run_interpretation(model, X, pca_obj, predictions, genes):
     attributions = np.zeros((len(prediction_names), X.shape[0], X.shape[1]))
 
     for i, pred_name in enumerate(prediction_names):
-        attributions[i] = dl.attribute(torch.FloatTensor(X).to(model.device), baseline.to(model.device), target=pred_name, return_convergence_delta=True)[0].cpu().detach()
-
+        temp_atts = None
+        for data,_ in dataloader:
+            baseline = torch.FloatTensor(np.full(data.shape, X.min()))
+            #baseline = torch.FloatTensor(np.zeros(data.shape))
+            temp = dl.attribute(data.to(model.device), baseline.to(model.device), target=pred_name, return_convergence_delta=True)[0].cpu().detach()
+            
+            if temp_atts == None: temp_atts = temp
+            else:
+                temp_atts = torch.cat((temp_atts, temp), 0)
+        #attributions[i] = dl.attribute(torch.FloatTensor(X).to(model.device), baseline.to(model.device), target=pred_name, return_convergence_delta=True)[0].cpu().detach()
+        attributions[i] = temp_atts
+        print('done with ' + str(pred_name) + ' cell type')
     mean_attributions = np.zeros((len(prediction_names), X.shape[1]))
     for i in range(attributions.shape[0]):
         mean_attributions[i] = torch.mean(torch.tensor(attributions[i]), 0)
@@ -241,12 +253,16 @@ def run_interpretation(model, X, pca_obj, predictions, genes):
     mean_attributions = torch.FloatTensor(mean_attributions.T)
 
     cor_loadings = torch.FloatTensor(pca_obj.components_.T * np.sqrt(pca_obj.explained_variance_))
-    gene_att_scores = torch.mm(cor_loadings, mean_attributions)
+    #gene_att_scores = torch.mm(cor_loadings, mean_attributions)
+    gene_att_scores = torch.mm(torch.FloatTensor(pca_obj.components_.T), mean_attributions)
     gene_att_scores = gene_att_scores.numpy()
     att_df = pd.DataFrame(gene_att_scores)
     att_df.index = genes
     att_df.columns = prediction_names
-
+    
+    pd.DataFrame(cor_loadings.numpy()).to_csv("cor_loadings.csv")
+    pd.DataFrame(mean_attributions.numpy()).to_csv("mean_atts.csv")
+    pd.DataFrame(pca_obj.components_.T).to_csv("comp_loadings.csv")
     return att_df
 
 def weighted_encode(df, encoded_y, tool_weights):

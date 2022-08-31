@@ -9,23 +9,25 @@ import torch
 class scSHARP:
     """Class that runs predictions"""
 
-    def __init__(self, data_path, tool_preds, tool_list, marker_path, neighbors=2, config="2_40.txt"):
+    def __init__(self, data_path, tool_preds, tool_list, marker_path, neighbors=2, config="2_40.txt", ncells="all"):
         self.data_path = data_path
         self.preds_path = tool_preds
         self.tools = tool_list
         self.marker_path = marker_path
         self.neighbors = neighbors
         self.config = config
+        self.ncells = ncells
         self.cell_names = None
         self.model = None
         self.final_preds = None
         self.genes = None
         self.X = None
         self.pca_obj = None
+        self.batch_size = None
     
     def run_prediction(self, training_epochs=150, thresh=0.51, batch_size=40, seed=8):
         """Trains GCN modle on consensus labels and returns predictions"""
-
+        self.batch_size = batch_size 
         if os.path.exists(self.preds_path):
             all_labels = pd.read_csv(self.preds_path, index_col=0)
             if all_labels.shape[1] != len(self.tools): 
@@ -35,7 +37,11 @@ class scSHARP:
             raise Exception("Prediction Dataframe not Found at " + self.data_path)
         
         # read in dataset
-        counts = pd.read_csv(self.data_path, index_col=0)
+        if self.ncells == "all":
+            counts = pd.read_csv(self.data_path, index_col=0)
+        else:
+            counts = pd.read_csv(self.data_path, index_col=0, nrows=self.ncells)
+            all_labels = all_labels.head(self.ncells)
         self.X, keep_cells,keep_genes,self.pca_obj = utilities.preprocess(np.array(counts), scale=False, comps=500)
         self.genes = counts.columns.to_numpy()[keep_genes]
         all_labels = all_labels.loc[keep_cells,:]
@@ -68,7 +74,7 @@ class scSHARP:
     def run_interpretation(self):
         """Runs model gradient based interpretation"""
         
-        int_df = utilities.run_interpretation(self.model, self.X, self.pca_obj, self.final_preds, self.genes)
+        int_df = utilities.run_interpretation(self.model, self.X, self.pca_obj, self.final_preds, self.genes, self.batch_size)
         int_df.columns = self.cell_names
         
         return int_df

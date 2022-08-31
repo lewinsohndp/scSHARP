@@ -119,7 +119,8 @@ def test_model(data_folders, tool_list, votes, model_file, neighbors, nbatch, tr
 if __name__ == "__main__":
     
     data_folders = ["/home/groups/ConradLab/daniel/sharp_data/pbmc_test/"]
-    tools = ["sctype","scsorter","scina", "singler", "scpred"]
+    #tools = ["sctype","scsorter","scina", "singler", "scpred"]
+    tools = ["sctype","scsorter","scina"]
     votes_necessary = .51
     model_file = "configs/2_40.txt"
     neighbors = 5
@@ -130,4 +131,4 @@ if __name__ == "__main__":
     meta="labels_cd4-8.csv"
     meta_col = 0
     df = test_model(data_folders, tools, votes_necessary, model_file, neighbors, batch_size, training_epochs, random_inits, counts=counts, meta=meta, meta_col=meta_col)
-    df.to_csv("pbmc_test_results.csv")
+    df.to_csv("pbmc_test_results_marker_only.csv")
