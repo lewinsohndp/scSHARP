@@ -13,7 +13,7 @@ from rpy2.robjects.conversion import localconverter
 import json
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
-from captum.attr import IntegratedGradients, DeepLift
+from captum.attr import IntegratedGradients, DeepLift, DeepLiftShap, FeaturePermutation
 import math
 from sklearn.metrics import confusion_matrix
 
@@ -218,37 +218,39 @@ def filter_scores(scores, thresh = 0.5):
 def run_interpretation(model, X, pca_obj, predictions, genes, batch_size):
     """Method to run interpretation on model"""
     
-    dataset  = torch.utils.data.TensorDataset(torch.FloatTensor(X), torch.zeros(X.shape[0]))
+    dataset  = torch.utils.data.TensorDataset(torch.FloatTensor(X), predictions.cpu())
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=False)
     predictions = predictions.cpu()
     prediction_names = predictions.unique().tolist()
     classes = [None]*len(prediction_names)
     for i, pred in enumerate(prediction_names):
         classes[i] = np.where(predictions == pred)[0]
-    
+    #pd.DataFrame(classes).to_csv("preds_test.csv")
     # fix adding eval mode
 
     dl = DeepLift(model)
+    #dl = DeepLiftShap(model)
+    #dl = FeaturePermutation(model)
     baseline = torch.FloatTensor(np.full(X.shape, X.min()))
 
-    attributions = np.zeros((len(prediction_names), X.shape[0], X.shape[1]))
-
-    for i, pred_name in enumerate(prediction_names):
-        temp_atts = None
-        for data,_ in dataloader:
-            baseline = torch.FloatTensor(np.full(data.shape, X.min()))
-            #baseline = torch.FloatTensor(np.zeros(data.shape))
-            temp = dl.attribute(data.to(model.device), baseline.to(model.device), target=pred_name, return_convergence_delta=True)[0].cpu().detach()
-            
-            if temp_atts == None: temp_atts = temp
-            else:
-                temp_atts = torch.cat((temp_atts, temp), 0)
-        #attributions[i] = dl.attribute(torch.FloatTensor(X).to(model.device), baseline.to(model.device), target=pred_name, return_convergence_delta=True)[0].cpu().detach()
-        attributions[i] = temp_atts
-        print('done with ' + str(pred_name) + ' cell type')
+    #attributions = np.zeros((len(prediction_names), X.shape[0], X.shape[1]))
+    attributions = np.zeros((X.shape[0], X.shape[1]))
+    temp_atts = None
+    for data,preds in dataloader:
+        baseline = torch.FloatTensor(np.full(data.shape, X.min()))
+        #baseline = torch.FloatTensor(np.zeros(data.shape))
+        #baseline = torch.FloatTensor(np.full(data.shape, X.max()))
+        temp = dl.attribute(data.to(model.device), baseline.to(model.device), target=preds.to(model.device), return_convergence_delta=True)[0].cpu().detach()
+        #temp = dl.attribute(data.to(model.device), target=pred_name).cpu().detach()
+        if temp_atts == None: temp_atts = temp
+        else:
+            temp_atts = torch.cat((temp_atts, temp), 0)
+    
+    attributions = temp_atts
+    #pd.DataFrame(attributions.numpy()).to_csv("single_atts.csv")
     mean_attributions = np.zeros((len(prediction_names), X.shape[1]))
-    for i in range(attributions.shape[0]):
-        mean_attributions[i] = torch.mean(torch.tensor(attributions[i]), 0)
+    for i in range(len(prediction_names)):
+        mean_attributions[i] = torch.mean(attributions[classes[i],:], 0)
     
     mean_attributions = torch.FloatTensor(mean_attributions.T)
 
@@ -260,9 +262,10 @@ def run_interpretation(model, X, pca_obj, predictions, genes, batch_size):
     att_df.index = genes
     att_df.columns = prediction_names
     
-    pd.DataFrame(cor_loadings.numpy()).to_csv("cor_loadings.csv")
-    pd.DataFrame(mean_attributions.numpy()).to_csv("mean_atts.csv")
-    pd.DataFrame(pca_obj.components_.T).to_csv("comp_loadings.csv")
+     
+    #pd.DataFrame(cor_loadings.numpy()).to_csv("cor_loadings.csv")
+    #pd.DataFrame(mean_attributions.numpy()).to_csv("mean_atts.csv")
+    #pd.DataFrame(pca_obj.components_.T).to_csv("comp_loadings.csv")
     return att_df
 
 def weighted_encode(df, encoded_y, tool_weights):
