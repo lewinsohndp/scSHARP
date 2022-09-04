@@ -215,6 +215,40 @@ def filter_scores(scores, thresh = 0.5):
     
     return scores[keep_cols]
 
+def run_interpretation_new(model, X, predictions, genes, batch_size, device):
+    dataset  = torch.utils.data.TensorDataset(torch.FloatTensor(X), predictions.cpu())
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=False)
+    predictions = predictions.cpu()
+    prediction_names = predictions.unique().tolist()
+    classes = [None]*len(prediction_names)
+    for i, pred in enumerate(prediction_names):
+        classes[i] = np.where(predictions == pred)[0]
+
+    dl = DeepLift(model)
+   
+    attributions = np.zeros((X.shape[0], X.shape[1]))
+    temp_atts = None
+    for data,preds in dataloader:
+        baseline = torch.FloatTensor(np.zeros(data.shape))
+        temp = dl.attribute(data.to(device), baseline.to(device), target=preds.to(device), return_convergence_delta=True)[0].cpu().detach()
+        
+        if temp_atts == None: temp_atts = temp
+        else:
+            temp_atts = torch.cat((temp_atts, temp), 0)
+    
+    attributions = temp_atts
+    
+    mean_attributions = np.zeros((len(prediction_names), X.shape[1]))
+    for i in range(len(prediction_names)):
+        mean_attributions[i] = torch.mean(attributions[classes[i],:], 0)
+    
+    mean_attributions = torch.FloatTensor(mean_attributions.T)
+    att_df = pd.DataFrame(mean_attributions)
+    att_df.index = genes
+    att_df.columns = prediction_names
+
+    return att_df
+
 def run_interpretation(model, X, pca_obj, predictions, genes, batch_size):
     """Method to run interpretation on model"""
     
