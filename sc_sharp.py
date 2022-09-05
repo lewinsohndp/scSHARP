@@ -81,7 +81,7 @@ class scSHARP:
         pca.fit(X)
         pca_mod = PCAModel(pca.components_, pca.mean_)
         seq = torch.nn.Sequential(pca_mod, self.model)
-        int_df = utilities.run_interpretation_new(seq, self.X, self.final_preds, self.genes, self.batch_size)
+        int_df = utilities.run_interpretation_new(seq, X, self.final_preds, self.genes, self.batch_size, self.model.device)
         int_df.columns = self.cell_names
         
         return int_df
