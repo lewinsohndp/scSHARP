@@ -27,6 +27,8 @@ class scSHARP:
         self.pca_obj = None
         self.batch_size = None
         self.counts = None
+        self.keep_cells = None
+        self.confident_labels = None
     
     def run_prediction(self, training_epochs=150, thresh=0.51, batch_size=40, seed=8):
         """Trains GCN modle on consensus labels and returns predictions"""
@@ -45,9 +47,9 @@ class scSHARP:
         else:
             self.counts = pd.read_csv(self.data_path, index_col=0, nrows=self.ncells)
             all_labels = all_labels.head(self.ncells)
-        self.X, keep_cells,keep_genes,self.pca_obj = utilities.preprocess(np.array(self.counts), scale=False, comps=500)
+        self.X, self.keep_cells,keep_genes,self.pca_obj = utilities.preprocess(np.array(self.counts), scale=False, comps=500)
         self.genes = self.counts.columns.to_numpy()[keep_genes]
-        all_labels = all_labels.loc[keep_cells,:]
+        all_labels = all_labels.loc[self.keep_cells,:]
 
         _,marker_names = utilities.read_marker_file(self.marker_path)
 
@@ -57,12 +59,12 @@ class scSHARP:
         all_labels_factored = utilities.factorize_df(all_labels, marker_names)
         encoded_labels = utilities.encode_predictions(all_labels_factored)
 
-        confident_labels = utilities.get_consensus_labels(encoded_labels, necessary_vote = thresh)
+        self.confident_labels = utilities.get_consensus_labels(encoded_labels, necessary_vote = thresh)
 
-        train_nodes = np.where(confident_labels != -1)[0]
-        test_nodes = np.where(confident_labels == -1)[0]
+        train_nodes = np.where(self.confident_labels != -1)[0]
+        test_nodes = np.where(self.confident_labels == -1)[0]
 
-        dataset  = torch.utils.data.TensorDataset(torch.tensor(self.X), torch.tensor(confident_labels))
+        dataset  = torch.utils.data.TensorDataset(torch.tensor(self.X), torch.tensor(self.confident_labels))
         dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
         test_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=False)
 
@@ -72,7 +74,7 @@ class scSHARP:
         preds,_ = self.model.predict(test_dataloader)
         self.final_preds = preds.max(dim=1)[1]
 
-        return self.final_preds, train_nodes, test_nodes, keep_cells
+        return self.final_preds, train_nodes, test_nodes, self.keep_cells
 
     def run_interpretation(self):
         """Runs model gradient based interpretation"""
@@ -81,6 +83,11 @@ class scSHARP:
         pca.fit(X)
         pca_mod = PCAModel(pca.components_, pca.mean_)
         seq = torch.nn.Sequential(pca_mod, self.model)
+        #meta_path = "/home/groups/ConradLab/daniel/sharp_data/pbmc_test/labels_cd4-8.csv"
+        #metadata = pd.read_csv(meta_path, index_col=0)
+        #real_y = pd.factorize(metadata.iloc[:,0], sort=True)[0]
+        #real_y = real_y[self.keep_cells]
+        #real_y = torch.tensor(real_y)
         int_df = utilities.run_interpretation_new(seq, X, self.final_preds, self.genes, self.batch_size, self.model.device)
         int_df.columns = self.cell_names
         

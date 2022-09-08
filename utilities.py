@@ -36,8 +36,6 @@ class EdgeConv(MessagePassing):
 
     def message(self, x_i, x_j):
         # x_i has shape [E, in_channels]
-        # x_j has shape [E, in_channels]
-
         tmp = torch.cat([x_i, x_j - x_i], dim=1)  # tmp has shape [E, 2 * in_channels]
         return self.mlp(tmp)
 
@@ -215,7 +213,7 @@ def filter_scores(scores, thresh = 0.5):
     
     return scores[keep_cols]
 
-def run_interpretation_new(model, X, predictions, genes, batch_size, device):
+def run_interpretation_new(model, X, predictions, genes, batch_size, device, batches=None):
     dataset  = torch.utils.data.TensorDataset(torch.FloatTensor(X), predictions.cpu())
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=False)
     predictions = predictions.cpu()
@@ -225,24 +223,29 @@ def run_interpretation_new(model, X, predictions, genes, batch_size, device):
         classes[i] = np.where(predictions == pred)[0]
 
     dl = DeepLift(model)
-   
-    attributions = np.zeros((X.shape[0], X.shape[1]))
+    #dl = FeaturePermutation(model)
+    #attributions = np.zeros((X.shape[0], X.shape[1]))
     temp_atts = None
+    counter = 0
     for data,preds in dataloader:
         baseline = torch.FloatTensor(np.zeros(data.shape))
         temp = dl.attribute(data.to(device), baseline.to(device), target=preds.to(device), return_convergence_delta=True)[0].cpu().detach()
-        
+        #temp = dl.attribute(data.to(device), target=preds.to(device)).cpu().detach()
+           
         if temp_atts == None: temp_atts = temp
         else:
             temp_atts = torch.cat((temp_atts, temp), 0)
-    
+        #if counter % 10 == 0: print(str(counter))
+        counter +=1 
+        if batches != None:
+            if counter == batches: break
     attributions = temp_atts
     
     mean_attributions = np.zeros((len(prediction_names), X.shape[1]))
     for i in range(len(prediction_names)):
-        mean_attributions[i] = torch.mean(attributions[classes[i],:], 0)
+        mean_attributions[i] = torch.mean(attributions[classes[i][classes[i] < attributions.shape[0]],:], 0)
     
-    mean_attributions = torch.FloatTensor(mean_attributions.T)
+    mean_attributions = mean_attributions.T
     att_df = pd.DataFrame(mean_attributions)
     att_df.index = genes
     att_df.columns = prediction_names
@@ -262,9 +265,9 @@ def run_interpretation(model, X, pca_obj, predictions, genes, batch_size):
     #pd.DataFrame(classes).to_csv("preds_test.csv")
     # fix adding eval mode
 
-    dl = DeepLift(model)
+    #dl = DeepLift(model)
     #dl = DeepLiftShap(model)
-    #dl = FeaturePermutation(model)
+    dl = FeaturePermutation(model)
     baseline = torch.FloatTensor(np.full(X.shape, X.min()))
 
     #attributions = np.zeros((len(prediction_names), X.shape[0], X.shape[1]))
@@ -274,8 +277,8 @@ def run_interpretation(model, X, pca_obj, predictions, genes, batch_size):
         baseline = torch.FloatTensor(np.full(data.shape, X.min()))
         #baseline = torch.FloatTensor(np.zeros(data.shape))
         #baseline = torch.FloatTensor(np.full(data.shape, X.max()))
-        temp = dl.attribute(data.to(model.device), baseline.to(model.device), target=preds.to(model.device), return_convergence_delta=True)[0].cpu().detach()
-        #temp = dl.attribute(data.to(model.device), target=pred_name).cpu().detach()
+        #temp = dl.attribute(data.to(model.device), baseline.to(model.device), target=preds.to(model.device), return_convergence_delta=True)[0].cpu().detach()
+        temp = dl.attribute(data.to(model.device), target=preds.to(model.device)).cpu().detach()
         if temp_atts == None: temp_atts = temp
         else:
             temp_atts = torch.cat((temp_atts, temp), 0)
