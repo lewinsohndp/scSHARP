@@ -1,0 +1,18 @@
+---
+title: "Generate Figures"
+author: "Daniel Lewinsohn"
+date: '2022-09-08'
+output: html_document
+---
+
+
+```{r}
+jung_obj <- readRDS("~/desktop/process_seur_jung.rds")
+preds <- read.csv("~/desktop/sharp_preds_jung.csv", row.names = 1)
+preds[preds==0] = "spc"
+preds[preds==1] = "spd"
+preds[preds==2] = "spg"
+jung_obj <- AddMetaData(jung_obj, preds[,1], col.name="sharp_preds")
+VlnPlot(jung_obj, features = c("Ncl", "Hsp90ab1","Dazl", "Rpl4", "Prrc2c"), group.by = "sharp_preds")
+```
+
