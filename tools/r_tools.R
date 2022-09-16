@@ -106,9 +106,12 @@ run <- function(data_path, tools, markers=NULL, marker_names=NULL, ref_path=NULL
   require(dplyr)
   require(SingleR)
   require("scPred")
-  
+  #set.seed(25) 
   counts <- read.csv(data_path, header=T, row.names = 1)
-  data <- CreateSeuratObject(t(counts))
+  print(dim(counts))
+  data <- CreateSeuratObject(t(counts), min.cells=3, min.features=200)
+  #data <- CreateSeuratObject(t(counts))
+  print(dim(data@assays$RNA@counts))
   data <- NormalizeData(data)
   data <- ScaleData(data)
   data <- FindVariableFeatures(data, selection.method = "vst", nfeatures = 2000)
@@ -126,7 +129,7 @@ run <- function(data_path, tools, markers=NULL, marker_names=NULL, ref_path=NULL
   tools <- unlist(tools)
   #markers <- list(Group1=c("Gene1","Gene3"), Group2=c("Gene2"))
   #print(markers)
-  results_df <- data.frame(start=rep(0,nrow(counts)))
+  results_df <- data.frame(start=rep(0,ncol(x = data)))
   #print(row.names(data@assays$RNA@data))
   if("scina" %in% tools){
     results_df$scina <- run_scina(data, markers)

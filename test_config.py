@@ -26,6 +26,7 @@ batch_size = int(config['batch_size'])
 neighbors = int(config['neighbors'])
 targets = 4
 tools = ["sctype","scsorter","scina", "singler", "scpred"]
+#tools = ["sctype", "scsorter", "scina"]
 votes = .51
 training_epochs = 150
 data_path = data_folder + "query_counts.csv"
@@ -42,7 +43,7 @@ else:
 X = pd.read_csv(data_path, index_col=0)
 X, keep_cells,_,_ = utilities.preprocess(np.array(X), scale=False)
 
-all_labels = all_labels.loc[keep_cells,:]
+#all_labels = all_labels.loc[keep_cells,:]
 
 _,marker_names = utilities.read_marker_file(marker_path)
 

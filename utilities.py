@@ -355,3 +355,17 @@ def validation_metrics(real_y, preds, train_nodes, test_nodes):
     test_cm = confusion_matrix(real_y[test_nodes], preds[test_nodes])
 
     return float(all_accuracy), all_cm, float(train_accuracy), train_cm, float(test_accuracy), test_cm
+
+def get_max_consensus(votes):
+    """Gets max consensus"""
+    final_preds = []
+    for row in votes:
+        max_index = np.argmax(row)
+        if np.count_nonzero(row == row[max_index]) > 1:
+            final_pred = -1
+        else:
+            final_pred = max_index
+
+        final_preds.append(final_pred)
+    return torch.tensor(final_preds)
+

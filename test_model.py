@@ -29,7 +29,7 @@ def test_model(data_folders, tool_list, votes, model_file, neighbors, nbatch, tr
         X = pd.read_csv(data_path, index_col=0)
         X, keep_cells,_,_ = utilities.preprocess(np.array(X), scale=False)
 
-        all_labels = all_labels.loc[keep_cells,:]
+        #all_labels = all_labels.loc[keep_cells,:]
 
         _,marker_names = utilities.read_marker_file(marker_path)
 
@@ -67,7 +67,8 @@ def test_model(data_folders, tool_list, votes, model_file, neighbors, nbatch, tr
 
         print(total_accuracies)
         # max of columns pred.
-        max_pred = torch.tensor(encoded_labels).max(dim=1)[1]
+        #max_pred = torch.tensor(encoded_labels).max(dim=1)[1]
+        max_pred = utilities.get_max_consensus(encoded_labels)
 
         dataset_names = ["GCN", "Max Col.", "Confident Labels"] + tool_list + ["Tool Avg."]
         # full dataset accuracy
@@ -119,11 +120,11 @@ def test_model(data_folders, tool_list, votes, model_file, neighbors, nbatch, tr
 if __name__ == "__main__":
     
     data_folders = ["/home/groups/ConradLab/daniel/sharp_data/pbmc_test/"]
-    #tools = ["sctype","scsorter","scina", "singler", "scpred"]
-    tools = ["sctype","scsorter","scina"]
+    tools = ["sctype","scsorter","scina", "singler", "scpred"]
+    #tools = ["sctype","scsorter","scina"]
     votes_necessary = .51
-    model_file = "configs/2_40.txt"
-    neighbors = 5
+    model_file = "configs/2_25.txt"
+    neighbors = 2
     batch_size=50
     training_epochs=150
     random_inits = 5
@@ -131,4 +132,4 @@ if __name__ == "__main__":
     meta="labels_cd4-8.csv"
     meta_col = 0
     df = test_model(data_folders, tools, votes_necessary, model_file, neighbors, batch_size, training_epochs, random_inits, counts=counts, meta=meta, meta_col=meta_col)
-    df.to_csv("pbmc_test_results_marker_only.csv")
+    df.to_csv("pbmc_test_results.csv")

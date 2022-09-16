@@ -15,5 +15,7 @@ data <- FindNeighbors(data)
 data <- FindClusters(data)
 data <- RunUMAP(data, dims = 1:50)
 
+preds <- read.csv(paste(output_path,"sharp_preds.csv", sep=""), row.names = 1)
+data <- AddMetaData(data, preds[,1], col.name="sharp_preds")
 saveRDS(data, file = paste(output_path, "process_seur.rds", sep=""))
 write.csv(Embeddings(data, reduction="umap"), paste(output_path,"umap_embedding.csv",sep=""))

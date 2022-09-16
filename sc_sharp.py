@@ -49,7 +49,7 @@ class scSHARP:
             all_labels = all_labels.head(self.ncells)
         self.X, self.keep_cells,keep_genes,self.pca_obj = utilities.preprocess(np.array(self.counts), scale=False, comps=500)
         self.genes = self.counts.columns.to_numpy()[keep_genes]
-        all_labels = all_labels.loc[self.keep_cells,:]
+        #all_labels = all_labels.loc[self.keep_cells,:]
 
         _,marker_names = utilities.read_marker_file(self.marker_path)
 
