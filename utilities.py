@@ -1,4 +1,5 @@
 import torch
+from torch_cluster import knn_graph
 from torch_geometric.nn import MessagePassing
 from torch.nn import Sequential as Seq, Linear, SiLU, Dropout, ELU, Tanh
 import anndata as ad
@@ -16,6 +17,7 @@ from sklearn.preprocessing import OneHotEncoder
 from captum.attr import IntegratedGradients, DeepLift, DeepLiftShap, FeaturePermutation
 import math
 from sklearn.metrics import confusion_matrix
+from collections import Counter
 
 """General functions and definitions"""
 
@@ -369,3 +371,36 @@ def get_max_consensus(votes):
         final_preds.append(final_pred)
     return torch.tensor(final_preds)
 
+def knn_consensus(counts, preds, n_neighbors):
+    """Do kNN consensus, iterate until x% do not change"""
+
+    knn = knn_graph(torch.FloatTensor(counts), k=n_neighbors)
+    preds = np.array(preds)
+    count = 0
+    while True:
+        new_preds = preds.copy()
+        changed = 0
+        for i in range(counts.shape[0]):
+            sub_knn = knn[:,knn[1,:]==i]
+            neighbors = sub_knn[0,:]
+            neighbor_preds = preds[neighbors]
+            if type(neighbor_preds) == np.int64 or type(neighbor_preds) == np.float64: neighbor_preds = np.array([neighbor_preds])
+            vote_counts = Counter(neighbor_preds).most_common()
+
+            if len(vote_counts) == 1:
+                if vote_counts[0][0] != -1:
+                    # update preds
+                    new_preds[i] = vote_counts[0][0]
+            
+            elif vote_counts[0][1] != vote_counts[1][1] and vote_counts[0][0] != -1:
+                # update preds
+                new_preds[i] = vote_counts[0][0]
+
+        #if np.mean( preds != new_preds ) < .05: break
+        preds = new_preds
+        if len(preds[preds == -1]) == 0: break
+        
+        count += 1
+        print(count)
+        #break
+    return preds
