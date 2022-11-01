@@ -1,0 +1,1 @@
+{"config": "2_25.txt", "dropout": 0.0, "batch_size": 1000, "neighbors": 250}

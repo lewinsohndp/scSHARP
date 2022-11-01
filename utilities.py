@@ -371,7 +371,7 @@ def get_max_consensus(votes):
         final_preds.append(final_pred)
     return torch.tensor(final_preds)
 
-def knn_consensus(counts, preds, n_neighbors):
+def knn_consensus(counts, preds, n_neighbors, converge=False, one_epoch=False):
     """Do kNN consensus, iterate until x% do not change"""
 
     knn = knn_graph(torch.FloatTensor(counts), k=n_neighbors)
@@ -386,7 +386,6 @@ def knn_consensus(counts, preds, n_neighbors):
             neighbor_preds = preds[neighbors]
             if type(neighbor_preds) == np.int64 or type(neighbor_preds) == np.float64: neighbor_preds = np.array([neighbor_preds])
             vote_counts = Counter(neighbor_preds).most_common()
-
             if len(vote_counts) == 1:
                 if vote_counts[0][0] != -1:
                     # update preds
@@ -397,10 +396,63 @@ def knn_consensus(counts, preds, n_neighbors):
                 new_preds[i] = vote_counts[0][0]
 
         #if np.mean( preds != new_preds ) < .05: break
-        preds = new_preds
-        if len(preds[preds == -1]) == 0: break
+        if len(new_preds[new_preds == -1]) == 0 and converge==False:
+            preds = new_preds
+            break
+        if np.mean( preds != new_preds ) < .05 and converge==True: 
+            preds = new_preds
+            break
+        if one_epoch == True:
+            preds = new_preds
+            break
         
+        preds = new_preds
         count += 1
         print(count)
+        if count > 50: break
         #break
     return preds
+
+def knn_consensus_batch(counts, preds, n_neighbors, converge=False, one_epoch=False, batch_size=1000):
+    """Do kNN consensus, iterate until x% do not change"""
+
+    preds = np.array(preds)
+    count = 0
+    while True:
+        new_preds = torch.tensor([])
+        dataset  = torch.utils.data.TensorDataset(torch.tensor(counts), torch.tensor(preds))
+        dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=False)
+        for batch, labels in dataloader:
+            knn = knn_graph(batch, k=n_neighbors)
+            loc_new_preds = torch.clone(labels)
+            for i in range(batch.shape[0]):
+                sub_knn = knn[:,knn[1,:]==i]
+                neighbors = sub_knn[0,:]
+                neighbor_preds = labels[neighbors]
+                if type(neighbor_preds) == np.int64 or type(neighbor_preds) == np.float64: neighbor_preds = np.array([neighbor_preds])
+                vote_counts = Counter(neighbor_preds.detach().numpy()).most_common()
+                if len(vote_counts) == 1:
+                    if vote_counts[0][0] != -1:
+                        # update preds
+                        loc_new_preds[i] = float(vote_counts[0][0])
+
+                elif vote_counts[0][1] != vote_counts[1][1] and vote_counts[0][0] != -1:
+                    # update preds
+                    loc_new_preds[i] = float(vote_counts[0][0])
+            new_preds = torch.cat((new_preds,loc_new_preds))
+        #if np.mean( preds != new_preds ) < .05: break
+        if len(new_preds[new_preds == -1]) == 0 and converge==False:
+            preds = new_preds
+            break
+        if np.mean( np.array(preds) != np.array(new_preds) ) < .05 and converge==True:
+            preds = new_preds
+            break
+        if one_epoch == True: 
+            preds = new_preds
+            break
+        preds = new_preds
+        count += 1
+        print(count)
+        if count > 50: break
+        #break
+    return preds.detach().numpy()
