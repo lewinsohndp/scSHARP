@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd
 import torch
 import os
+from sklearn.metrics import ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
 
 data_path = "/home/groups/ConradLab/daniel/sharp_data/pbmc_test/counts.csv"
 tool_preds = "/home/groups/ConradLab/daniel/sharp_data/pbmc_test/preds.csv"
@@ -25,7 +27,7 @@ else:
 
 meta_path = "/home/groups/ConradLab/daniel/sharp_data/pbmc_test/labels_cd4-8.csv"
 metadata = pd.read_csv(meta_path, index_col=0)
-real_y = pd.factorize(metadata.iloc[:,0], sort=True)[0]
+real_y, keys = pd.factorize(metadata.iloc[:,0], sort=True)
 real_y = real_y[keep_cells]
 print(real_y.shape)
 print(np.count_nonzero(real_y == 0))
@@ -36,10 +38,25 @@ print(np.count_nonzero(real_y == 4))
 print(np.count_nonzero(keep_cells))
 print(len(test_nodes))
 print(len(train_nodes))
-acc, conf_mat, _,_,_,_ = utilities.validation_metrics(torch.tensor(real_y), preds.cpu(), train_nodes, test_nodes)
-print(acc)
-print(conf_mat)
-print(conf_mat.diagonal()/conf_mat.sum(axis=1))
+results = utilities.validation_metrics(torch.tensor(real_y), preds.cpu(), train_nodes, test_nodes)
+#print(acc)
+#print(conf_mat)
+#print(conf_mat.diagonal()/conf_mat.sum(axis=1))
+
+d = ConfusionMatrixDisplay(results[1], display_labels = keys)
+d.plot()
+#plt.show()
+plt.savefig('figures/pbmc_all_cm.pdf')  
+
+d = ConfusionMatrixDisplay(results[3], display_labels = keys)
+d.plot()
+#plt.show()
+plt.savefig('figures/pbmc_train_cm.pdf')
+
+d = ConfusionMatrixDisplay(results[5], display_labels = keys)
+d.plot()
+#plt.show()
+plt.savefig('figures/pbmc_test_cm.pdf')
 
 #pd.Series(preds.cpu().numpy()).to_csv("/home/groups/ConradLab/daniel/sharp_data/pbmc_test/sharp_preds.csv")
 conf_labels = pd.Series(sharp.confident_labels)

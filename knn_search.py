@@ -13,14 +13,17 @@ import random
 
 data_folder = sys.argv[1]
 marker_path = data_folder + "markers.txt"
-tools = ["sctype","scsorter","scina", "singler", "scpred"]
+if data_folder == "/home/groups/ConradLab/daniel/sharp_data/jung/":
+    tools = ["sctype","scsorter","scina"]
+else:
+    tools = ["sctype","scsorter","scina", "singler", "scpred"]
 votes = .51
 
 print(data_folder)
 all_labels = pd.read_csv(data_folder + "preds.csv", index_col=0)
 if all_labels.shape[1] != len(tools): raise Exception("wrong amount of tools in file")
 
-data_path = data_folder + "query_counts.csv"
+data_path = data_folder + "counts.csv"
 
 # read in dataset
 X = pd.read_csv(data_path, index_col=0)
@@ -45,24 +48,24 @@ confident_labels[validation_nodes] = -1
 
 print("One epoch")
 #one epoch
-for i in [10, 50, 100, 200, 400, 500]:
+for i in [10, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900]:
     preds = utilities.knn_consensus_batch(X, confident_labels, i, converge=False, one_epoch=True, batch_size=1000)
     print(i)
     print(utilities.validation_metrics(torch.tensor(unmasked_confident), torch.tensor(preds), validation_nodes, range(len(unmasked_confident)))[0:4])
 
 print("Until all labelled")
 # until all labelled
-for i in [10,50,100, 200, 400, 500]:
+for i in [10,50,100, 200, 300, 400, 500, 600, 700, 800, 900]:
     preds = utilities.knn_consensus_batch(X, confident_labels, i, converge=False, one_epoch=False, batch_size=1000)
     print(i)
-    print(utilities.validation_metrics(torch.tensor(unmasked_confident), torch.tensor(preds), validation_nodes, range(len(unmasked_confident)))[2])
+    print(utilities.validation_metrics(torch.tensor(unmasked_confident), torch.tensor(preds), validation_nodes, range(len(unmasked_confident)))[0:4])
 
 print("Until Converge")
 # until converge batch
-for i in [10,50,100,200,400,500]:
+for i in [10,50,100,200,300, 400,500,600,700,800,900]:
     preds = utilities.knn_consensus_batch(X, confident_labels, i, batch_size = 1000, converge=True, one_epoch=False)
     print(i)
-    print(utilities.validation_metrics(torch.tensor(unmasked_confident), torch.tensor(preds), validation_nodes, range(len(unmasked_confident)))[2])
+    print(utilities.validation_metrics(torch.tensor(unmasked_confident), torch.tensor(preds), validation_nodes, range(len(unmasked_confident)))[0:4])
 
 
 
