@@ -413,7 +413,7 @@ def knn_consensus(counts, preds, n_neighbors, converge=False, one_epoch=False):
         #break
     return preds
 
-def knn_consensus_batch(counts, preds, n_neighbors, converge=False, one_epoch=False, batch_size=1000):
+def knn_consensus_batch(counts, preds, n_neighbors, converge=False, one_epoch=False, batch_size=1000, keep_conf=False):
     """Do kNN consensus, iterate until x% do not change"""
 
     preds = np.array(preds)
@@ -426,6 +426,7 @@ def knn_consensus_batch(counts, preds, n_neighbors, converge=False, one_epoch=Fa
             knn = knn_graph(batch, k=n_neighbors)
             loc_new_preds = torch.clone(labels)
             for i in range(batch.shape[0]):
+                if keep_conf==True and labels[i] != -1: continue
                 sub_knn = knn[:,knn[1,:]==i]
                 neighbors = sub_knn[0,:]
                 neighbor_preds = labels[neighbors]

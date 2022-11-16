@@ -183,7 +183,7 @@ if(length(args) > 2){
   print(ref_path)
   results <- run(data_path, tools, markers, marker_names, ref_path, ref_label_path)
   
-  write.csv(results, paste(out_path,"preds.csv", sep=""))
+  write.csv(results, paste(out_path,"preds_att_marker_test.csv", sep=""))
   
 }
 
