@@ -26,6 +26,6 @@ data_name = "pbmc"
 neighbors = [10,50,100, 200, 300, 400, 500, 600, 700]
 accuracies = []
 # one epoch
-preds = utilities.knn_consensus_batch(X, confident_labels, 200, converge=False, one_epoch=True, batch_size=1000)
+preds = utilities.knn_consensus_batch(X, confident_labels, 200, converge=True, one_epoch=False, batch_size=1000, keep_conf=True)
 print(utilities.validation_metrics(torch.tensor(real_y), torch.tensor(preds), train_nodes, test_nodes))
 

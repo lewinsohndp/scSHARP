@@ -16,3 +16,4 @@
 
 
 Generated with knn_pbmc.py
+preds = utilities.knn_consensus_batch(X, confident_labels, 200, converge=False, one_epoch=True, batch_size=1000)
