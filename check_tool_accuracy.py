@@ -5,6 +5,14 @@ import utilities
 from sc_sharp import scSHARP
 import os
 
+def get_class_accuracy(conf_mat, labels):
+    label_count = 0
+    for i in range(conf_mat.shape[0]):
+        if conf_mat.shape[0] > len(labels) and i ==0: continue
+        print(labels[label_count])
+        print(conf_mat[i,i] / sum(conf_mat[i,:]))
+        label_count +=1
+
 # updated marker experiment
 all_labels = pd.read_csv("/home/groups/ConradLab/daniel/sharp_data/pbmc_test/preds_att_marker_test.csv", index_col=0)
 scina_preds,_ = pd.factorize(all_labels.scina, sort=True)
@@ -38,15 +46,24 @@ if os.path.exists("pbmc_test_trained_model_8"):
 results = utilities.validation_metrics(torch.tensor(real_labels[keep_cells]), torch.tensor(scina_preds), train_nodes, test_nodes)
 print('scina results')
 print(results)
-print(utilities.validation_metrics(torch.tensor(real_labels[keep_cells]), torch.tensor(real_scina_preds), train_nodes, test_nodes))
+print(get_class_accuracy(results[1], keys))
+results_original=(utilities.validation_metrics(torch.tensor(real_labels[keep_cells]), torch.tensor(real_scina_preds), train_nodes, test_nodes))
+print(results_original)
+print(get_class_accuracy(results_original[1], keys))
 
 results = utilities.validation_metrics(torch.tensor(real_labels[keep_cells]), torch.tensor(sctype_preds), train_nodes, test_nodes)
 print('sctype results')
 print(results)
-print(utilities.validation_metrics(torch.tensor(real_labels[keep_cells]), torch.tensor(real_sctype_preds), train_nodes, test_nodes))
+print(get_class_accuracy(results[1], keys))
+results_original=(utilities.validation_metrics(torch.tensor(real_labels[keep_cells]), torch.tensor(real_sctype_preds), train_nodes, test_nodes))
+print(results_original)
+print(get_class_accuracy(results_original[1], keys))
 
 results = utilities.validation_metrics(torch.tensor(real_labels[keep_cells]), torch.tensor(scsorter_preds), train_nodes, test_nodes)
 print('scsorter results')
 print(results)
-print(utilities.validation_metrics(torch.tensor(real_labels[keep_cells]), torch.tensor(real_scsorter_preds), train_nodes, test_nodes))
+print(get_class_accuracy(results[1], keys))
+results_original = (utilities.validation_metrics(torch.tensor(real_labels[keep_cells]), torch.tensor(real_scsorter_preds), train_nodes, test_nodes))
+print(results_original)
+print(get_class_accuracy(results_original[1], keys))
 
