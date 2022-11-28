@@ -27,7 +27,7 @@ neighbors = [10,50,100, 200, 300, 400, 500, 600, 700, 800,900]
 accuracies = []
 # one epoch
 for i in neighbors:
-    preds = utilities.knn_consensus_batch(X, confident_labels, i, converge=False, one_epoch=True, batch_size=1000)
+    preds = utilities.knn_consensus_batch(X, confident_labels, i, converge=False, one_epoch=True, batch_size=1000, keep_conf=True)
     print(i)
     accuracies.append(utilities.validation_metrics(torch.tensor(real_y), torch.tensor(preds), range(len(real_y)), range(len(real_y)))[0])
 
@@ -35,13 +35,13 @@ plt.scatter(neighbors, accuracies)
 plt.xlabel("Neighbors")
 plt.ylabel("Accuracy")
 plt.title("One Epoch")
-plt.savefig('figures/' + data_name + '_knn_plot_one.pdf')
+plt.savefig('figures/' + data_name + '_knn_fixed_plot_one.pdf')
 accuracies = []
 plt.clf()
 
 # until converge
 for i in neighbors:
-    preds = utilities.knn_consensus_batch(X, confident_labels, i, converge=True, one_epoch=False, batch_size=1000)
+    preds = utilities.knn_consensus_batch(X, confident_labels, i, converge=True, one_epoch=False, batch_size=1000, keep_conf=True)
     print(i)
     accuracies.append(utilities.validation_metrics(torch.tensor(real_y), torch.tensor(preds), range(len(real_y)), range(len(real_y)))[0])
 
@@ -49,13 +49,13 @@ plt.scatter(neighbors, accuracies)
 plt.xlabel("Neighbors")
 plt.ylabel("Accuracy")
 plt.title("Iterate until convergence")
-plt.savefig('figures/' + data_name + '_knn_plot_converge.pdf') 
+plt.savefig('figures/' + data_name + '_knn_fixed_plot_converge.pdf') 
 accuracies = []
 plt.clf()
 
 # until all labelled
 for i in neighbors:
-    preds = utilities.knn_consensus_batch(X, confident_labels, i, converge=False, one_epoch=False, batch_size=1000)
+    preds = utilities.knn_consensus_batch(X, confident_labels, i, converge=False, one_epoch=False, batch_size=1000, keep_conf=True)
     print(i)
     accuracies.append(utilities.validation_metrics(torch.tensor(real_y), torch.tensor(preds), range(len(real_y)), range(len(real_y)))[0])
 
@@ -63,6 +63,6 @@ plt.scatter(neighbors, accuracies)
 plt.xlabel("Neighbors")
 plt.ylabel("Accuracy")
 plt.title("Iterate until all labeled")
-plt.savefig('figures/' + data_name + '_knn_plot_all.pdf')
+plt.savefig('figures/' + data_name + '_knn_fixed_plot_all.pdf')
 plt.clf()
 accuracies = []
