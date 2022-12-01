@@ -129,7 +129,6 @@ dmypy.json
 .pyre/
 
 # simulation param dataset
-simulations/
 grid_search_files/
 grid_search_output/
 *.err

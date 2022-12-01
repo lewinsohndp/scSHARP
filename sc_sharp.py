@@ -72,9 +72,9 @@ class scSHARP:
         self.model.train(dataloader, epochs=training_epochs, verbose=True)
 
         preds,_ = self.model.predict(test_dataloader)
-        self.final_preds = preds.max(dim=1)[1]
+        self.conf_scores, self.final_preds = preds.max(dim=1)
 
-        return self.final_preds, train_nodes, test_nodes, self.keep_cells
+        return self.final_preds, train_nodes, test_nodes, self.keep_cells, self.conf_scores
 
     def run_interpretation(self):
         """Runs model gradient based interpretation"""
