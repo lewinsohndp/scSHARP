@@ -1,4 +1,4 @@
-import utilities
+from .utilities import utilities
 import torch
 from torch_cluster import knn_graph
 from sklearn.metrics import confusion_matrix

@@ -3,8 +3,8 @@ import numpy as np
 import pandas as pd
 import json
 import torch
-import utilities
-from gcn_model import GCNModel
+from .utilities import utilities
+from .gcn_model import GCNModel
 import os
 import statistics
 import random

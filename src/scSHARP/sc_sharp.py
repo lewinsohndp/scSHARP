@@ -1,11 +1,11 @@
-import utilities
+from .utilities import utilities
 import numpy as np
 import pandas as pd
 import torch
 import os
-from gcn_model import GCNModel
+from .gcn_model import GCNModel
 import torch
-from pca_model import PCAModel
+from .pca_model import PCAModel
 from sklearn.decomposition import PCA
 
 class scSHARP:

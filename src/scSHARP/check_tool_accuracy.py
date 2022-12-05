@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 import torch
-import utilities
-from sc_sharp import scSHARP
+from .utilities import utilities
+from .sc_sharp import scSHARP
 import os
 
 def get_class_accuracy(conf_mat, labels):
