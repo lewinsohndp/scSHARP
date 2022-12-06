@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import torch
-from .utilities import utilities
+from . import utilities
 from .sc_sharp import scSHARP
 import os
 

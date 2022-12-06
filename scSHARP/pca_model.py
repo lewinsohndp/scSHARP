@@ -1,4 +1,4 @@
-from .utilities import utilities
+from . import utilities
 import torch
 
 class PCAModel(torch.nn.Module):

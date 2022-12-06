@@ -1,4 +1,5 @@
-from .utilities import utilities
+from . import utilities
+#import scSHARP.utilities as utilities
 import numpy as np
 import pandas as pd
 import torch

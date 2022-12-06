@@ -18,6 +18,8 @@ from captum.attr import IntegratedGradients, DeepLift, DeepLiftShap, FeaturePerm
 import math
 from sklearn.metrics import confusion_matrix
 from collections import Counter
+from os.path import exists
+import pkg_resources
 
 """General functions and definitions"""
 
@@ -111,7 +113,10 @@ def label_counts(data_path, tools, ref_path, ref_label_path, marker_path):
 def load_model(file_path, target_types):
         """loads model from json format"""
         
-        f = open(file_path)
+        if not exists(file_path):
+            f = pkg_resources.resource_stream(__name__, file_path)
+        else:
+            f = open(file_path)
         data = json.load(f)
         f.close()
         final_layers = []

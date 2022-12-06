@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import json
 import torch
-from .utilities import utilities
+from . import utilities
 from .gcn_model import GCNModel
 import os
 import statistics
