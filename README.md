@@ -8,3 +8,5 @@ pip install scSHARP
 ```
 
 Installation of torch and torch geometric required prior to pip install.
+
+See demo.ipynb for example work flow.
