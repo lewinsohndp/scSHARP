@@ -43,12 +43,12 @@ class EdgeConv(MessagePassing):
         tmp = torch.cat([x_i, x_j - x_i], dim=1)  # tmp has shape [E, 2 * in_channels]
         return self.mlp(tmp)
 
-def preprocess(data, normalize=True, scale=True, targetsum=1e4, run_pca=True, comps=500, cell_fil=200):
+def preprocess(data, normalize=True, scale=True, targetsum=1e4, run_pca=True, comps=500, cell_fil=0, gene_fil=0):
     """method for preprocessing raw counts matrix"""
 
     adata = ad.AnnData(data, dtype=data.dtype)
     row_filter, _ = sc.pp.filter_cells(adata, min_genes=cell_fil, inplace=False)
-    col_filter,_ = sc.pp.filter_genes(adata, min_cells=3, inplace=False)
+    col_filter,_ = sc.pp.filter_genes(adata, min_cells=gene_fil, inplace=False)
     subset = adata[row_filter,col_filter]
     adata = ad.AnnData(subset.X, dtype=subset.X.dtype)
     if normalize:
