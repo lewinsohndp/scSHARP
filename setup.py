@@ -3,12 +3,14 @@ from distutils.core import setup
 
 if __name__== '__main__':
     setup(include_package_data=True,
-          description='test',
-          long_description="""test""",
-          url='test',
-          version='0.1.2',
+          description='scSHARP tool for single cell consensus classification',
+          long_description="""Team Software Project""",
+          url='https://github.com/mperozek11/scSHARP_tool',
+          version='0.1.4',
           packages=find_namespace_packages(),
           zip_safe=False,
+          license_files = ('LICENSE.txt',),
+          python_requires='>=3.8.0',
           setup_requires=[],
           install_requires=['pandas>=1.3.4',
                             'scikit-learn>=1.0.1',
