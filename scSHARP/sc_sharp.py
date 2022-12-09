@@ -9,6 +9,7 @@ from .gcn_model import GCNModel
 import torch
 from .pca_model import PCAModel
 from sklearn.decomposition import PCA
+import subprocess
 
 class scSHARP:
     """Class that runs predictions"""
@@ -31,6 +32,21 @@ class scSHARP:
         self.counts = None
         self.keep_cells = None
         self.confident_labels = None
+        
+    def run_tools(self, out_path, ref_path, ref_label_path):
+        try:
+            run_script = "Rscript ./rdriver.r"
+            add_variables = run_script + " " + self.data_path + " " + out_path + " " + self.marker_path + " " + ref_path + " " + ref_label_path
+            subprocess.call("Rscript ./rdriver.r", shell=True)
+            
+            self.preds_path = out_path
+            
+            # R output file read
+        except:
+            print("Something went wrong with running the R tools. ")
+            
+        
+        
     
     def run_prediction(self, training_epochs=150, thresh=0.51, batch_size=40, seed=8):
         """Trains GCN modle on consensus labels and returns predictions"""
