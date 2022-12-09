@@ -36,8 +36,8 @@ class scSHARP:
     def run_tools(self, out_path, ref_path, ref_label_path):
         try:
             run_script = "Rscript ./rdriver.r"
-            add_variables = run_script + " " + self.data_path + " " + out_path + " " + self.marker_path + " " + ref_path + " " + ref_label_path
-            subprocess.call("Rscript ./rdriver.r", shell=True)
+            bash = run_script + " " + self.data_path + " " + out_path + " " + self.marker_path + " " + ref_path + " " + ref_label_path
+            subprocess.call(bash, shell=True)
             
             self.preds_path = out_path
             
