@@ -8,7 +8,10 @@ Repository for "Consensus Label Propagation with Graph Convolutional Networks fo
 conda create -n <env name> python=3.9
 conda activate <env name>
 ```
-
+### Install pip to conda environment
+```
+conda install pip
+```
 ### Install torch
 
 Linux with GPU:
@@ -26,9 +29,13 @@ conda install pyg -c pyg
 ```
 
 ### Install scSHARP
-
+You will need to use the version of pip installed to your new conda environemt. In order to find the path to your conda environment, you can use:
 ```
-pip install scSHARP
+conda config --show envs_dirs
+```
+Run the pip install of scSHARP directly from the binary in yout conda directory
+```
+./anaconda/envs/<env_name>/bin/pip install scSHARP
 ```
 
 Installation of torch and torch geometric required prior to pip install.
