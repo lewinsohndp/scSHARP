@@ -1,7 +1,11 @@
 from . import utilities
 import torch
+from torch.nn import Sequential as Seq, Linear, SiLU, Dropout, ELU, Tanh
 from torch_cluster import knn_graph
 from sklearn.metrics import confusion_matrix
+from torch_geometric.nn import MessagePassing
+
+
 
 class GCNModel(torch.nn.Module):
     """class for label propagation GCN model"""
@@ -24,7 +28,7 @@ class GCNModel(torch.nn.Module):
         X = dropout(X)
         for layer in self.layers:
             #if on linear layer, no need to construct graph
-            if type(layer) == utilities.EdgeConv:
+            if type(layer) == EdgeConv:
                 if edge_index==None:
                     edge_index = self.construct_graph(X)
                 X = layer(X, edge_index)                
@@ -131,4 +135,22 @@ class GCNModel(torch.nn.Module):
 
 
 
+class EdgeConv(MessagePassing):
+    """Edge convolutional layer definition"""
 
+    def __init__(self, in_channels, out_channels):
+        super().__init__(aggr='add') #  "Max" aggregation.
+        self.mlp = Seq(Linear(2 * in_channels, out_channels),
+                       SiLU(),
+                       Linear(out_channels, out_channels))
+
+    def forward(self, x, edge_index):
+        # x has shape [N, in_channels]
+        # edge_index has shape [2, E]
+
+        return self.propagate(edge_index, x=x)
+
+    def message(self, x_i, x_j):
+        # x_i has shape [E, in_channels]
+        tmp = torch.cat([x_i, x_j - x_i], dim=1)  # tmp has shape [E, 2 * in_channels]
+        return self.mlp(tmp)

@@ -1,4 +1,5 @@
 from . import utilities
+from . import interpret
 #import scSHARP.utilities as utilities
 import numpy as np
 import pandas as pd
@@ -40,7 +41,8 @@ class scSHARP:
                 all_labels = all_labels[self.tools]
                 
         else:
-            raise Exception("Prediction Dataframe not Found at " + self.data_path)
+            raise Exception("Prediction Dataframe not Found at " + self.data_path) # TODO should this be self.preds_path?
+
         
         # read in dataset
         if self.ncells == "all":
@@ -89,7 +91,7 @@ class scSHARP:
         #real_y = pd.factorize(metadata.iloc[:,0], sort=True)[0]
         #real_y = real_y[self.keep_cells]
         #real_y = torch.tensor(real_y)
-        int_df = utilities.run_interpretation_new(seq, X, self.final_preds, self.genes, self.batch_size, self.model.device)
+        int_df = interpret.interpret_model_new(seq, X, self.final_preds, self.genes, self.batch_size, self.model.device)
         int_df.columns = self.cell_names
         
         return int_df
@@ -103,3 +105,6 @@ class scSHARP:
         """Load model as serialized object at specified path"""
 
         self.model = torch.load(file_path)
+
+    def __str__(self):
+        return f'scSHARP object: Neighbors: {self.neighbors} Config path: {self.config} Num cells: {self.ncells}'
