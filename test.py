@@ -12,4 +12,4 @@ ref_label_path = "examples/splat_0.8/ref_labels.csv"
 
 sharp = scSHARP(data_path, tool_list, marker_path, neighbors, config)
 
-scSHARP.run_tools(out_path, ref_path, ref_label_path)
+sharp.run_tools(out_path, ref_path, ref_label_path)

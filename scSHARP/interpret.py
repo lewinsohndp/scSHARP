@@ -44,9 +44,6 @@ def interpret_model_new(model, X, predictions, genes, batch_size, device, batche
 
     return att_df
 
-def heat_map(att_df):
-    
-    pass
 
 def interpret_model(model, X, pca_obj, predictions, genes, batch_size):
     """Method to run interpretation on model"""

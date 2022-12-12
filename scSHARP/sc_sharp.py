@@ -10,6 +10,9 @@ import torch
 from .pca_model import PCAModel
 from sklearn.decomposition import PCA
 import subprocess
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn import preprocessing
 
 class scSHARP:
     """Class that runs predictions"""
@@ -111,6 +114,34 @@ class scSHARP:
         int_df.columns = self.cell_names
         
         return int_df
+
+    def heat_map(self, att_df, out_dir=None, n=5):
+        att_df = att_df.abs()
+        scale_int_df = pd.DataFrame(preprocessing.scale(att_df, with_mean=False))
+        scale_int_df.columns = att_df.columns
+        scale_int_df.index = att_df.index
+        markers = self.__get_most_expressed(scale_int_df, n)
+
+        scale_int_df = np.arcsinh(scale_int_df)
+        ax = sns.heatmap(scale_int_df.loc[markers,:])
+        ax.set(xlabel="Cell Type")
+        plt.plot()
+        plt.show()
+
+        if out_dir:
+            plt.savefig(out_dir, format="pdf", bbox_inches="tight")
+            ax.savefig(out_dir, format="pdf", bbox_inches="tight")
+
+        return ax
+
+    def __get_most_expressed(self, df, n=5):
+        '''Get top n marker genes for each cell type'''
+        markers = []
+        for gene in df.columns:
+            ordered_df = df.sort_values(gene, ascending=False).head(n)
+            markers += list(ordered_df.index)
+
+        return list(set(markers)) # remove duplicates
 
     def save_model(self, file_path):
         """Save model as serialized object at specified path"""
