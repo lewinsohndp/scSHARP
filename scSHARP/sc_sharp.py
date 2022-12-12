@@ -110,7 +110,7 @@ class scSHARP:
         #real_y = pd.factorize(metadata.iloc[:,0], sort=True)[0]
         #real_y = real_y[self.keep_cells]
         #real_y = torch.tensor(real_y)
-        int_df = interpret.interpret_model_new(seq, X, self.final_preds, self.genes, self.batch_size, self.model.device)
+        int_df = interpret.interpret_model(seq, X, self.final_preds, self.genes, self.batch_size, self.model.device)
         int_df.columns = self.cell_names
         
         return int_df
@@ -122,7 +122,6 @@ class scSHARP:
         scale_int_df.index = att_df.index
         markers = self.__get_most_expressed(scale_int_df, n)
 
-        scale_int_df = np.arcsinh(scale_int_df)
         ax = sns.heatmap(scale_int_df.loc[markers,:])
         ax.set(xlabel="Cell Type")
         plt.plot()
@@ -137,11 +136,11 @@ class scSHARP:
     def __get_most_expressed(self, df, n=5):
         '''Get top n marker genes for each cell type'''
         markers = []
-        for gene in df.columns:
-            ordered_df = df.sort_values(gene, ascending=False).head(n)
+        for ctype in df.columns:
+            ordered_df = df.sort_values(ctype, ascending=False).head(n)
             markers += list(ordered_df.index)
 
-        return list(set(markers)) # remove duplicates
+        return markers
 
     def save_model(self, file_path):
         """Save model as serialized object at specified path"""
