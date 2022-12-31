@@ -10,4 +10,5 @@ pbmc_knn_result_fixed.txt - Results of non-parametric neighbor majority approach
 
 ## To use:
 Please visit https://github.com/W-Holtz/R4scSHARP for the implementation of ScType, ScSorter, SCINA, scPred, and singleR in one R package.    
-Please visit https://github.com/mperozek11/scSHARP_tool for use of our newly developed GCN label propagation tool as a Python package.
+Please visit https://github.com/mperozek11/scSHARP_tool for use of our newly developed GCN label propagation tool as a Python package.    
+Thank you to William Holtz, Ben Modlin, and Max Perozek for their work on these software packages.
