@@ -1,7 +1,7 @@
 import torch
 from torch_cluster import knn_graph
 from torch_geometric.nn import MessagePassing
-from torch.nn import Sequential as Seq, Linear, SiLU, Dropout, ELU, Tanh
+from torch.nn import Sequential as Seq, Linear, SiLU, Dropout, ELU, Tanh, ReLU
 import anndata as ad
 import scanpy as sc
 from sklearn.decomposition import PCA
@@ -27,7 +27,7 @@ class EdgeConv(MessagePassing):
     def __init__(self, in_channels, out_channels):
         super().__init__(aggr='add') #  "Max" aggregation.
         self.mlp = Seq(Linear(2 * in_channels, out_channels),
-                       SiLU(),
+                       ReLU(),
                        Linear(out_channels, out_channels))
 
     def forward(self, x, edge_index):
@@ -231,9 +231,11 @@ def run_interpretation_new(model, X, predictions, genes, batch_size, device, bat
     counter = 0
     for data,preds in dataloader:
         baseline = torch.FloatTensor(np.zeros(data.shape))
-        temp = dl.attribute(data.to(device), baseline.to(device), target=preds.to(device), return_convergence_delta=True)[0].cpu().detach()
+        temp,delta = dl.attribute(data.to(device), baseline.to(device), target=preds.to(device), return_convergence_delta=True)
+        temp = temp.cpu().detach()
+        delta = delta.cpu().detach()
         #temp = dl.attribute(data.to(device), target=preds.to(device)).cpu().detach()
-           
+        print(delta)
         if temp_atts == None: temp_atts = temp
         else:
             temp_atts = torch.cat((temp_atts, temp), 0)
