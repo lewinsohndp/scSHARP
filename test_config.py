@@ -13,7 +13,7 @@ import random
 
 data_folder = sys.argv[1]
 output_folder = sys.argv[2]
-config_file = "grid_search_files_103022/" + sys.argv[3]
+config_file = "grid_search_files/" + sys.argv[3]
 out_file = sys.argv[3]
 
 with open(config_file) as f:
@@ -24,12 +24,12 @@ gcn_file = "configs/" + config['config']
 dropout = float(config['dropout'])
 batch_size = int(config['batch_size'])
 neighbors = int(config['neighbors'])
-targets = 3
-#tools = ["sctype","scsorter","scina", "singler", "scpred"]
-tools = ["sctype", "scsorter", "scina"]
+targets = 4
+tools = ["sctype","scsorter","scina", "singler", "scpred"]
+#tools = ["sctype", "scsorter", "scina"]
 votes = .51
 training_epochs = 150
-data_path = data_folder + "counts.csv"
+data_path = data_folder + "query_counts.csv"
 ref_path = data_folder + "ref_counts.csv"
 ref_label_path = data_folder + "ref_labels.csv"
 marker_path = data_folder + "markers.txt"
