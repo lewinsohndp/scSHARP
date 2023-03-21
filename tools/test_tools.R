@@ -51,6 +51,7 @@ run_sctype <- function(data, markers=NULL, ref=NULL){
   if(is.null(markers)){
     return(F)
   }
+  set.seed(1000)
   print("Running scType")
   source("https://raw.githubusercontent.com/IanevskiAleksandr/sc-type/master/R/gene_sets_prepare.R")
   source("https://raw.githubusercontent.com/IanevskiAleksandr/sc-type/master/R/sctype_score_.R")
@@ -99,7 +100,7 @@ run_scpred <- function(data, ref, ref_labels){
 
 run <- function(data_path, tools, markers=NULL, marker_names=NULL, ref_path=NULL, ref_labels_path=NULL){
   # add ability to take in seurat counts object
-  
+  set.seed(1000) 
   require(Seurat)
   require(SCINA)
   require(scSorter)
@@ -189,7 +190,7 @@ if(length(args) > 2){
   print(ref_path)
   results <- run(data_path, tools, markers, marker_names, ref_path, ref_label_path)
   
-  write.csv(results, "preds_test_0.7")
+  write.csv(results, "preds_test_jung")
   
 }
 
