@@ -18,6 +18,7 @@ from captum.attr import IntegratedGradients, DeepLift, DeepLiftShap, FeaturePerm
 import math
 from sklearn.metrics import confusion_matrix
 from collections import Counter
+import scipy
 
 """General functions and definitions"""
 
@@ -457,3 +458,22 @@ def knn_consensus_batch(counts, preds, n_neighbors, converge=False, one_epoch=Fa
         if count > 50: break
         #break
     return preds.detach().numpy()
+
+def average_linkage(X, Y):
+    """calculate the average linkage between two clusters
+       samples by features for both
+       expecting numpy arrays 
+    """
+
+    total = 0
+    
+    for i in range(X.shape[0]):
+        for j in range(Y.shape[0]):
+            #print(X[i,:])
+            #print(Y[j,:]) 
+            total += scipy.spatial.distance.euclidean(X[i,:], Y[j,:])
+            #print(scipy.spatial.distance.euclidean(X[i,:], Y[j,:]))
+            #print(total)
+    return total / (X.shape[0] * Y.shape[0])
+
+    
