@@ -1,0 +1,11 @@
+b_cells and cd14_monocytes = 39.66530823073674
+b_cells and cd4_t_cell = 36.41303545651876
+b_cells and cd56_nk = 39.16775237297079
+b_cells and cd8_t_cell = 35.154598289893485
+cd14_monocytes and cd4_t_cell = 41.36156586743406
+cd14_monocytes and cd56_nk = 42.04896043176129
+cd14_monocytes and cd8_t_cell = 40.639877996394056
+cd4_t_cell and cd56_nk = 38.36158831880141
+cd4_t_cell and cd8_t_cell = 34.04338626383174
+cd56_nk and cd8_t_cell = 36.92302338632017
+Index(['b_cells', 'cd14_monocytes', 'cd4_t_cell', 'cd56_nk', 'cd8_t_cell'], dtype='object')
